@@ -1,7 +1,7 @@
 {
   "name": "my-watch-later",
   "version": "1.0.0",
-  "description": "A better Watch Later feature",
+  "description": "A YouTube Watch Later feature that you own",
   "main": "my-watch-later.js",
   "type": "module",
   "author": "Michael Moreno",
