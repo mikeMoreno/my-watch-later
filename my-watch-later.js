@@ -16,25 +16,35 @@
 
 const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.0";
+const ArchiveList = "archiveList";
+const WatchList = "watchlist";
+const SortDirection = "sortDirection";
 
 async function loadWatchlistAsync() {
-  const watchlist = (await GM.getValue("watchlist")) ?? "";
+  const watchlist = (await GM.getValue(WatchList)) ?? "";
 
-  if (!watchlist || watchlist === "") {
+  if (watchlist == null || watchlist === "") {
     return [];
   }
 
-  return JSON.parse(watchlist);
+  const parsedWatchlist = JSON.parse(watchlist);
+
+  const parsedWatchlistWithDates = parsedWatchlist.map((video) => ({
+    ...video,
+    dateAdded: new Date(video.dateAdded),
+  }));
+
+  return parsedWatchlistWithDates;
 }
 
 async function saveWatchlistAsync(watchlist) {
-  await GM.setValue("watchlist", JSON.stringify(watchlist));
+  await GM.setValue(WatchList, JSON.stringify(watchlist));
 }
 
 async function loadArchiveListAsync() {
-  const archiveList = (await GM.getValue("archiveList")) ?? "";
+  const archiveList = (await GM.getValue(ArchiveList)) ?? "";
 
-  if (!archiveList || archiveList === "") {
+  if (archiveList == null || archiveList === "") {
     return [];
   }
 
@@ -42,7 +52,7 @@ async function loadArchiveListAsync() {
 }
 
 async function saveArchiveListAsync(archiveList) {
-  await GM.setValue("archiveList", JSON.stringify(archiveList));
+  await GM.setValue(ArchiveList, JSON.stringify(archiveList));
 }
 
 function isVideoUrl(url) {
@@ -81,19 +91,14 @@ async function isVideoInWatchlistAsync(url) {
   return false;
 }
 
-async function disableAddToWatchlistButtonIfWeAlreadyHaveVideo() {
-  const url = getCurrentVideoUrl();
+async function getCurrentSortDirectionAsync() {
+  const sortDirection = (await GM.getValue(SortDirection)) ?? "Ascending";
 
-  if (url == null) {
-    return;
-  }
+  return sortDirection;
+}
 
-  if (!(await isVideoInWatchlistAsync(url))) {
-    return;
-  }
-
-  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-  addToWatchlistBtn.disabled = true;
+async function setSortDirectionAsync(nextDirection) {
+  await GM.setValue(SortDirection, nextDirection);
 }
 
 function removeElementById(id) {
@@ -154,19 +159,29 @@ async function archiveVideoAsync(indexToArchive) {
 async function changeSortDirectionAsync() {
   const watchlist = await loadWatchlistAsync();
 
-  if (watchlist.length === 0) {
-    return;
+  const sortDirection = await getCurrentSortDirectionAsync();
+
+  if (sortDirection === "Ascending") {
+    watchlist.sort(function (videoA, videoB) {
+      return videoB.dateAdded - videoA.dateAdded;
+    });
+  } else {
+    watchlist.sort(function (videoA, videoB) {
+      return videoA.dateAdded - videoB.dateAdded;
+    });
   }
 
-  const sortedList = [];
+  const nextDirection =
+    sortDirection === "Ascending" ? "Descending" : "Ascending";
 
-  for (let i = watchlist.length - 1; i >= 0; i--) {
-    sortedList.push(watchlist[i]);
-  }
+  await setSortDirectionAsync(nextDirection);
 
-  await saveWatchlistAsync(sortedList);
+  await saveWatchlistAsync(watchlist);
 
-  populateListUI(sortedList);
+  populateListUI(watchlist);
+
+  var changeSortBtn = document.getElementById("change-sort-direction");
+  changeSortBtn.innerText = `Sort: ${nextDirection}`;
 }
 
 async function viewArchiveAsync() {
@@ -208,6 +223,7 @@ async function addToWatchlistAsync() {
   const newVideo = {
     title: title,
     url: url,
+    dateAdded: Date.now(),
   };
 
   watchlist.push(newVideo);
@@ -250,6 +266,8 @@ function populateListUI(watchlist) {
 }
 
 async function openWatchLaterAsync() {
+  const sortDirection = await getCurrentSortDirectionAsync();
+
   const watchlist = await loadWatchlistAsync();
 
   const watchlistPopup = `
@@ -263,16 +281,21 @@ async function openWatchLaterAsync() {
     background: black; border: 2px solid white; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
     <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
-    <button id="change-sort-direction">Change Sort Direction</button>
+    <button id="change-sort-direction">Sort: ${sortDirection}</button>
     <button id="view-archive">View Archive</button>
+    <button id="close-watchlist-top">Close</button>
     <ul id="watchlist-videos"></ul>
-    <button id="close-watchlist" style="margin-top:10px">Close</button>
+    <button id="close-watchlist-bottom" style="margin-top:10px">Close</button>
 </div>
 `;
 
   document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
-  document.getElementById("close-watchlist").addEventListener("click", () => {
+  document.getElementById("close-watchlist-top").addEventListener("click", () => {
+    document.getElementById("my-watchlist").remove();
+  });
+
+  document.getElementById("close-watchlist-bottom").addEventListener("click", () => {
     document.getElementById("my-watchlist").remove();
   });
 
@@ -291,8 +314,6 @@ async function openWatchLaterAsync() {
   populateListUI(watchlist);
 }
 
-// TODO: keep state for most recent
-// TODO: add check to make sure we're on video page when adding video, presence of button isn't enough
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
 
@@ -319,10 +340,8 @@ async function main() {
     addToWatchlistBtn.nextSibling,
   );
 
-  if (window.location.href.indexOf("watch") < 0) {
+  if (!isVideoUrl(window.location.href)) {
     removeElementById("addVideoToWatchlist");
-  } else {
-    await disableAddToWatchlistButtonIfWeAlreadyHaveVideo();
   }
 }
 
