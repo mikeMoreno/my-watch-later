@@ -1,0 +1,34 @@
+{
+  "name": "my-watch-later",
+  "version": "1.0.0",
+  "description": "A better Watch Later feature",
+  "main": "my-watch-later.js",
+  "type": "module",
+  "author": "Michael Moreno",
+  "license": "GPL-3.0",
+  "scripts": {
+    "build": "node builder.js && npm run format-output",
+    "format": "prettier --write src/**/*.js && prettier --write builder.js && prettier --write my-watch-later.js",
+    "format-output": "prettier --write my-watch-later.js --log-level silent",
+    "lint": "eslint src/**/*.js && eslint builder.js && eslint my-watch-later.js",
+    "lint-fix": "eslint --fix src/**/*.js && eslint --fix builder.js && eslint --fix my-watch-later.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://codeberg.org/michaelmoreno/my-watch-later.git"
+  },
+  "bugs": {
+    "url": "https://codeberg.org/michaelmoreno/my-watch-later/issues"
+  },
+  "homepage": "https://codeberg.org/michaelmoreno/my-watch-later#readme",
+  "dependencies": {
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.3"
+  },
+  "jest": {
+    "transform": {}
+  }
+}
