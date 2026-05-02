@@ -273,6 +273,8 @@ async function openWatchLaterAsync() {
   populateListUI(watchlist);
 }
 
+// TODO: keep state for most recent
+// TODO: add check to make sure we're on video page when adding video, presence of button isn't enough
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
 
