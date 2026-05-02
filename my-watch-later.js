@@ -169,10 +169,7 @@ async function openWatchLaterAsync() {
   });
 }
 
-// TODO: disable button if already in watch later
-// TODO: prevent video from getting added twice
 async function main() {
-  // TODO: style this
   const addToWatchlistBtn = document.createElement("button");
 
   addToWatchlistBtn.innerText = "Add to My Watch Later";
