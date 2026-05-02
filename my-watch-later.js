@@ -3,6 +3,7 @@
 // @author       Michael Moreno
 // @description  A better Watch Later feature
 // @homepageURL  https://greasyfork.org
+// @match        https://www.youtube.com/*
 // @match        https://www.youtube.com/watch*
 // @version      1.0.0
 // @grant        GM.getValue
@@ -30,6 +31,42 @@ async function saveWatchlistAsync(watchlist) {
   await GM.setValue("watchlist", JSON.stringify(watchlist));
 }
 
+function getCurrentVideoUrl() {
+  let url = window.location.href;
+
+  if (url.indexOf("&") > 0) {
+    url = url.substring(0, url.indexOf("&"));
+  }
+
+  return url;
+}
+
+async function isVideoInWatchlistAsync(url) {
+  const watchlist = await loadWatchlistAsync();
+
+  if (watchlist.some((v) => v.url === url)) {
+    return true;
+  }
+
+  return false;
+}
+
+async function checkIfWeAlreadyHaveVideoAsync() {
+  const url = getCurrentVideoUrl();
+
+  if (!(await isVideoInWatchlistAsync(url))) {
+    return;
+  }
+
+  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+  addToWatchlistBtn.disabled = true;
+}
+
+function removeElementById(id) {
+  var element = document.getElementById(id);
+  element.parentNode.removeChild(element);
+}
+
 async function removeVideoAsync(indexToRemove) {
   const watchlist = await loadWatchlistAsync();
 
@@ -41,41 +78,42 @@ async function removeVideoAsync(indexToRemove) {
 
   await saveWatchlistAsync(newWatchlist);
 
-  var videoInWatchlist = document.getElementById(
-    `watchlist-video-${indexToRemove}`,
-  );
-  videoInWatchlist.parentNode.removeChild(videoInWatchlist);
+  removeElementById(`watchlist-video-${indexToRemove}`);
+
+  var modalWatchlistTitle = document.getElementById("my-watchlist-title");
+  modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
 }
 
-async function addToWatchLaterAsync() {
+async function addToWatchlistAsync() {
+  const url = getCurrentVideoUrl();
+
+  if (await isVideoInWatchlistAsync(url)) {
+    const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+    addToWatchlistBtn.disabled = true;
+
+    alert("We already had that video");
+    return;
+  }
+
+  const watchlist = await loadWatchlistAsync();
+
   const titleElement = document.getElementById("title");
 
   const title = titleElement.innerText.trim();
-
-  const url = window.location.href;
 
   const newVideo = {
     title: title,
     url: url,
   };
 
-  const watchlist = await loadWatchlistAsync();
-
-  console.log("old watchlist");
-  for (let i = 0; i < watchlist.length; i++) {
-    console.log(watchlist[i].title + " " + watchlist[i].url);
-  }
-
   watchlist.push(newVideo);
-  console.log("=============================");
-
-  console.log("new watchlist");
-
-  for (let i = 0; i < watchlist.length; i++) {
-    console.log(watchlist[i].title + " " + watchlist[i].url);
-  }
 
   await saveWatchlistAsync(watchlist);
+
+  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+  addToWatchlistBtn.disabled = true;
+
+  alert("Video added");
 }
 
 async function openWatchLaterAsync() {
@@ -85,16 +123,15 @@ async function openWatchLaterAsync() {
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
     transform: translate(-50%, -50%);
-    width:500px;
+    width:600px;
     background: white; border: 2px solid black; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-    <h2>My Watchlist</h2>
+    <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
     <ul id="watchlist-videos"></ul>
     <button id="close-watchlist">Close</button>
 </div>
 `;
 
-  // 2. Add it to the page
   document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
   const watchlistVideos = document.getElementById("watchlist-videos");
@@ -118,32 +155,39 @@ async function openWatchLaterAsync() {
 }
 
 // TODO: disable button if already in watch later
+// TODO: prevent video from getting added twice
 async function main() {
   // TODO: style this
-  const addToWatchLaterBtn = document.createElement("button");
+  const addToWatchlistBtn = document.createElement("button");
 
-  addToWatchLaterBtn.innerText = "Add to My Watch Later";
-  addToWatchLaterBtn.classList.add("style-scope", "ytd-watch-metadata");
+  addToWatchlistBtn.innerText = "Add to My Watch Later";
+  addToWatchlistBtn.id = "addVideoToWatchlist";
 
-  addToWatchLaterBtn.addEventListener("click", addToWatchLaterAsync);
+  addToWatchlistBtn.addEventListener("click", addToWatchlistAsync);
 
-  const ellipsisButton = document.getElementById("button-shape");
+  const ellipsisButton = document.getElementById("logo");
+
   ellipsisButton.parentNode.insertBefore(
-    addToWatchLaterBtn,
+    addToWatchlistBtn,
     ellipsisButton.nextSibling,
   );
 
   const openWatchLaterBtn = document.createElement("button");
 
   openWatchLaterBtn.innerText = "Open My Watch Later";
-  openWatchLaterBtn.classList.add("style-scope", "ytd-watch-metadata");
 
   openWatchLaterBtn.addEventListener("click", openWatchLaterAsync);
 
-  addToWatchLaterBtn.parentNode.insertBefore(
+  addToWatchlistBtn.parentNode.insertBefore(
     openWatchLaterBtn,
-    addToWatchLaterBtn.nextSibling,
+    addToWatchlistBtn.nextSibling,
   );
+
+  if (window.location.href.indexOf("watch") < 0) {
+    removeElementById("addVideoToWatchlist");
+  } else {
+    await checkIfWeAlreadyHaveVideoAsync();
+  }
 }
 
 // Google likes to be cute with their web pages.
