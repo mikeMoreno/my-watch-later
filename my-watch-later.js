@@ -192,6 +192,7 @@ async function viewArchiveAsync() {
   for (let i = 0; i < archiveList.length; i++) {
     archivedVideos += archiveList[i].title + "\n";
     archivedVideos += archiveList[i].url + "\n";
+    archivedVideos += archiveList[i].dateAdded + "\n";
     archivedVideos += "====\n";
   }
 
