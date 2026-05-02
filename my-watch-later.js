@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Watch Later
 // @author       Michael Moreno
-// @description  A better Watch Later feature
+// @description  A Watch Later feature you own
 // @homepageURL  https://greasyfork.org
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube.com/watch*
@@ -45,8 +45,20 @@ async function saveArchiveListAsync(archiveList) {
   await GM.setValue("archiveList", JSON.stringify(archiveList));
 }
 
+function isVideoUrl(url) {
+  if (url == null || url.indexOf("watch?v=") < 0) {
+    return false;
+  }
+
+  return true;
+}
+
 function getCurrentVideoUrl() {
   let url = window.location.href;
+
+  if (!isVideoUrl(url)) {
+    return null;
+  }
 
   if (url.indexOf("&") > 0) {
     url = url.substring(0, url.indexOf("&"));
@@ -69,8 +81,12 @@ async function isVideoInWatchlistAsync(url) {
   return false;
 }
 
-async function checkIfWeAlreadyHaveVideoAsync() {
+async function disableAddToWatchlistButtonIfWeAlreadyHaveVideo() {
   const url = getCurrentVideoUrl();
+
+  if (url == null) {
+    return;
+  }
 
   if (!(await isVideoInWatchlistAsync(url))) {
     return;
@@ -170,6 +186,11 @@ async function viewArchiveAsync() {
 async function addToWatchlistAsync() {
   const url = getCurrentVideoUrl();
 
+  if (url == null) {
+    alert("This doesn't look like a video");
+    return;
+  }
+
   if (await isVideoInWatchlistAsync(url)) {
     const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
     addToWatchlistBtn.disabled = true;
@@ -192,9 +213,6 @@ async function addToWatchlistAsync() {
   watchlist.push(newVideo);
 
   await saveWatchlistAsync(watchlist);
-
-  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-  addToWatchlistBtn.disabled = true;
 
   alert("Video added");
 }
@@ -242,13 +260,13 @@ async function openWatchLaterAsync() {
     color: white;
     height:300px;
     overflow-y: auto;
-    background: black; border: 2px solid black; 
+    background: black; border: 2px solid white; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
     <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
     <button id="change-sort-direction">Change Sort Direction</button>
     <button id="view-archive">View Archive</button>
     <ul id="watchlist-videos"></ul>
-    <button id="close-watchlist">Close</button>
+    <button id="close-watchlist" style="margin-top:10px">Close</button>
 </div>
 `;
 
@@ -304,14 +322,8 @@ async function main() {
   if (window.location.href.indexOf("watch") < 0) {
     removeElementById("addVideoToWatchlist");
   } else {
-    await checkIfWeAlreadyHaveVideoAsync();
+    await disableAddToWatchlistButtonIfWeAlreadyHaveVideo();
   }
 }
 
-// Google likes to be cute with their web pages.
-// Add a delay to make sure script is executed
-// after they're done shifting the elements around.
-// The @run-at metadata key is not enough.
-setTimeout(() => {
-  main();
-}, 2000);
+main();
