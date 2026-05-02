@@ -91,6 +91,24 @@ async function removeVideoAsync(indexToRemove) {
   addToWatchlistBtn.disabled = false;
 }
 
+async function changeSortDirectionAsync() {
+  const watchlist = await loadWatchlistAsync();
+
+  if (watchlist.length === 0) {
+    return;
+  }
+
+  const sortedList = [];
+
+  for (let i = watchlist.length - 1; i >= 0; i--) {
+    sortedList.push(watchlist[i]);
+  }
+
+  await saveWatchlistAsync(sortedList);
+
+  populateListUI(sortedList);
+}
+
 async function addToWatchlistAsync() {
   const url = getCurrentVideoUrl();
 
@@ -123,27 +141,10 @@ async function addToWatchlistAsync() {
   alert("Video added");
 }
 
-async function openWatchLaterAsync() {
-  const watchlist = await loadWatchlistAsync();
-
-  const watchlistPopup = `
-<div id="my-watchlist" style="
-    position: fixed; top: 50%; left: 50%; 
-    transform: translate(-50%, -50%);
-    width: 700px;
-    height:300px;
-    overflow-y: auto;
-    background: black; border: 2px solid black; 
-    padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-    <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
-    <ul id="watchlist-videos"></ul>
-    <button id="close-watchlist">Close</button>
-</div>
-`;
-
-  document.body.insertAdjacentHTML("beforeend", watchlistPopup);
-
+function populateListUI(watchlist) {
   const watchlistVideos = document.getElementById("watchlist-videos");
+
+  watchlistVideos.innerHTML = "";
 
   for (let i = 0; i < watchlist.length; i++) {
     const url = watchlist[i].url;
@@ -163,10 +164,41 @@ async function openWatchLaterAsync() {
         await removeVideoAsync(i);
       });
   }
+}
+
+async function openWatchLaterAsync() {
+  const watchlist = await loadWatchlistAsync();
+
+  const watchlistPopup = `
+<div id="my-watchlist" style="
+    position: fixed; top: 50%; left: 50%; 
+    transform: translate(-50%, -50%);
+    width: 700px;
+    color: white;
+    height:300px;
+    overflow-y: auto;
+    background: black; border: 2px solid black; 
+    padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+    <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
+    <button id="change-sort-direction">Change Sort Direction</button>
+    <ul id="watchlist-videos"></ul>
+    <button id="close-watchlist">Close</button>
+</div>
+`;
+
+  document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
   document.getElementById("close-watchlist").addEventListener("click", () => {
     document.getElementById("my-watchlist").remove();
   });
+
+  document
+    .getElementById("change-sort-direction")
+    .addEventListener("click", () => {
+      changeSortDirectionAsync();
+    });
+
+  populateListUI(watchlist);
 }
 
 async function main() {
