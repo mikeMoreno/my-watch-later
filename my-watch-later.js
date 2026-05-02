@@ -41,6 +41,10 @@ function getCurrentVideoUrl() {
   return url;
 }
 
+function getIdPortionOfVideoUrl(url) {
+  return url.substring(url.indexOf("?v=") + 3);
+}
+
 async function isVideoInWatchlistAsync(url) {
   const watchlist = await loadWatchlistAsync();
 
@@ -126,8 +130,10 @@ async function openWatchLaterAsync() {
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
     transform: translate(-50%, -50%);
-    width:600px;
-    background: white; border: 2px solid black; 
+    width: 700px;
+    height:300px;
+    overflow-y: auto;
+    background: black; border: 2px solid black; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
     <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
     <ul id="watchlist-videos"></ul>
@@ -140,9 +146,15 @@ async function openWatchLaterAsync() {
   const watchlistVideos = document.getElementById("watchlist-videos");
 
   for (let i = 0; i < watchlist.length; i++) {
+    const url = watchlist[i].url;
+
     watchlistVideos.insertAdjacentHTML(
       "beforeend",
-      `<li id="watchlist-video-${i}"><a href="${watchlist[i].url}">${watchlist[i].title}</a><button id="remove-video-${i}">Remove</button></li>`,
+      `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
+      <img src="https://img.youtube.com/vi/${getIdPortionOfVideoUrl(url)}/default.jpg">
+        <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${watchlist[i].title}</a>
+        <button id="remove-video-${i}">Remove</button>
+      </li>`,
     );
 
     document
