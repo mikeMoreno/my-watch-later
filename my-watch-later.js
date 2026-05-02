@@ -82,6 +82,9 @@ async function removeVideoAsync(indexToRemove) {
 
   var modalWatchlistTitle = document.getElementById("my-watchlist-title");
   modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+
+  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+  addToWatchlistBtn.disabled = false;
 }
 
 async function addToWatchlistAsync() {
