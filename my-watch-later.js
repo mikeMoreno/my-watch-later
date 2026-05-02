@@ -192,6 +192,7 @@ async function viewArchiveAsync() {
   for (let i = 0; i < archiveList.length; i++) {
     archivedVideos += archiveList[i].title + "\n";
     archivedVideos += archiveList[i].url + "\n";
+    archivedVideos += archiveList[i].channel + "\n";
     archivedVideos += archiveList[i].dateAdded + "\n";
     archivedVideos += "====\n";
   }
@@ -221,9 +222,16 @@ async function addToWatchlistAsync() {
 
   const title = titleElement.innerText.trim();
 
+  const ownerElement = document.getElementById("owner");
+
+  const channel = ownerElement.innerText
+    .substring(0, ownerElement.innerText.indexOf("\n"))
+    .trim();
+
   const newVideo = {
     title: title,
     url: url,
+    channel: channel,
     dateAdded: Date.now(),
   };
 
@@ -292,13 +300,17 @@ async function openWatchLaterAsync() {
 
   document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
-  document.getElementById("close-watchlist-top").addEventListener("click", () => {
-    document.getElementById("my-watchlist").remove();
-  });
+  document
+    .getElementById("close-watchlist-top")
+    .addEventListener("click", () => {
+      document.getElementById("my-watchlist").remove();
+    });
 
-  document.getElementById("close-watchlist-bottom").addEventListener("click", () => {
-    document.getElementById("my-watchlist").remove();
-  });
+  document
+    .getElementById("close-watchlist-bottom")
+    .addEventListener("click", () => {
+      document.getElementById("my-watchlist").remove();
+    });
 
   document
     .getElementById("change-sort-direction")
