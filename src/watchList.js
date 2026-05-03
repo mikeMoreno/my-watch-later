@@ -88,11 +88,8 @@ class WatchList {
 
     Utils.removeElementById(`watchlist-video-${indexToRemove}`);
 
-    var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-    modalWatchlistTitle.innerText = `My Watchlist (${UserScriptVersion}) (${newWatchlist.length})`;
-
-    const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-    addToWatchlistBtn.disabled = false;
+    const videoCountElement = document.getElementById("videoCount");
+    videoCountElement.innerText = `${newWatchlist.length} videos`;
   }
 
   static async isVideoInWatchlistAsync(url) {
