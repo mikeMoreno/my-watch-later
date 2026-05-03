@@ -93,7 +93,7 @@ class ArchiveList {
     Utils.removeElementById(`watchlist-video-${indexToArchive}`);
 
     var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+    modalWatchlistTitle.innerText = `My Watchlist (${UserScriptVersion}) (${newWatchlist.length})`;
 
     const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
     addToWatchlistBtn.disabled = false;
@@ -216,7 +216,7 @@ class WatchLaterPopup {
     overflow-y: auto;
     background: black; border: 2px solid white; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-    <h2 id="my-watchlist-title">My Watchlist (${watchlist.length})</h2>
+    <h2 id="my-watchlist-title">My Watchlist (${UserScriptVersion}) (${watchlist.length})</h2>
     <button id="change-sort-direction">Sort: ${sortDirection}</button>
     <button id="view-archive">View Archive</button>
     <button id="close-watchlist-top">Close</button>
@@ -376,7 +376,7 @@ class WatchList {
     Utils.removeElementById(`watchlist-video-${indexToRemove}`);
 
     var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+    modalWatchlistTitle.innerText = `My Watchlist (${UserScriptVersion}) (${newWatchlist.length})`;
 
     const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
     addToWatchlistBtn.disabled = false;

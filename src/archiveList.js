@@ -42,7 +42,7 @@ class ArchiveList {
     Utils.removeElementById(`watchlist-video-${indexToArchive}`);
 
     var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+    modalWatchlistTitle.innerText = `My Watchlist (${UserScriptVersion}) (${newWatchlist.length})`;
 
     const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
     addToWatchlistBtn.disabled = false;
