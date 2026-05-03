@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         My Watch Later
+// @namespace    http://www.mikesbytes.net/userscripts
+// @version      1.0.0
+// @description  A YouTube Watch Later feature that you own
 // @author       Michael Moreno
-// @description  A Watch Later feature you own
 // @homepageURL  https://greasyfork.org
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube.com/watch*
-// @version      1.0.0
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM_openInTab
