@@ -1,15 +1,14 @@
 // ==UserScript==
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  A YouTube Watch Later feature that you own
 // @author       Michael Moreno
-// @homepageURL  https://greasyfork.org
+// @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube.com/watch*
 // @grant        GM.getValue
 // @grant        GM.setValue
-// @grant        GM_openInTab
 // @license      GPL-3.0
 // ==/UserScript==
 
@@ -17,7 +16,7 @@
 
 /* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
-const UserScriptVersion = "1.0.0";
+const UserScriptVersion = "1.0.1";
 /* eslint-enable no-unused-vars */
 
 // eslint-disable-next-line no-unused-vars
@@ -269,28 +268,30 @@ class WatchLaterPopup {
     watchlistVideos.innerHTML = "";
 
     for (let i = 0; i < watchlist.length; i++) {
+      const videoId = watchlist[i].id;
+      const title = watchlist[i].title;
       const url = watchlist[i].url;
 
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
-        `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
+        `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
       <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
-        <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${watchlist[i].title}</a>
-        <button id="remove-video-${i}" style="margin-right:10px">Remove</button>
-        <button id="archive-video-${i}">Archive</button>
+        <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
+        <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
+        <button id="archive-video-${videoId}">Archive</button>
       </li>`,
       );
 
       document
-        .getElementById(`remove-video-${i}`)
+        .getElementById(`remove-video-${videoId}`)
         .addEventListener("click", async () => {
-          await WatchList.removeVideoAsync(i);
+          await WatchList.removeVideoAsync(videoId);
         });
 
       document
-        .getElementById(`archive-video-${i}`)
+        .getElementById(`archive-video-${videoId}`)
         .addEventListener("click", async () => {
-          await ArchiveList.archiveVideoAsync(i);
+          await ArchiveList.archiveVideoAsync(videoId);
         });
     }
   }
@@ -350,6 +351,7 @@ class WatchList {
       .trim();
 
     const newVideo = {
+      id: crypto.randomUUID(),
       title,
       url,
       channel,
@@ -369,20 +371,18 @@ class WatchList {
     alert("Video added");
   }
 
-  static async removeVideoAsync(indexToRemove) {
+  static async removeVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
     if (watchlist.length === 0) {
       return;
     }
 
-    const newWatchlist = watchlist.filter(
-      (v, index) => index !== indexToRemove,
-    );
+    const newWatchlist = watchlist.filter((v) => v.id !== id);
 
     await WatchList.saveWatchlistAsync(newWatchlist);
 
-    Utils.removeElementById(`watchlist-video-${indexToRemove}`);
+    Utils.removeElementById(`watchlist-video-${id}`);
 
     const videoCountElement = document.getElementById("videoCount");
     videoCountElement.innerText = `${newWatchlist.length} videos`;
