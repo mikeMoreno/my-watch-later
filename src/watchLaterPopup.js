@@ -52,7 +52,7 @@ class WatchLaterPopup {
     <h1 id="my-watchlist-title" style="margin-bottom:10px">My Watchlist (${UserScriptVersion})</h1>
     <div style="margin-bottom:10px">
       <button id="change-sort-direction">Sort: ${sortDirection}</button>
-      <button id="view-archive">View Archive</button>
+      <button id="export-watchlist">Export</button>
       <button id="close-watchlist-top">Close</button>
     </div>
     <h2 id="videoCount">${watchlist.length} videos</h2>
@@ -83,9 +83,9 @@ class WatchLaterPopup {
       });
 
     document
-      .getElementById("view-archive")
+      .getElementById("export-watchlist")
       .addEventListener("click", async () => {
-        await ArchiveList.viewArchiveAsync();
+        await WatchList.exportWatchlistAsync();
       });
 
     WatchLaterPopup.populateListUI(watchlist);

@@ -101,6 +101,32 @@ class WatchList {
 
     return false;
   }
+
+  static async exportWatchlistAsync() {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    /* eslint-disable n/no-unsupported-features/node-builtins */
+    const data = {
+      /* eslint-disable no-undef */
+      source: UserScriptName,
+      version: UserScriptVersion,
+      /* eslint-enable no-undef */
+      watchlist,
+    };
+
+    const blob = new Blob([JSON.stringify(data)], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "exported_watchlist.json";
+
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+    /* eslint-enable n/no-unsupported-features/node-builtins */
+  }
 }
 
 export default WatchList;
