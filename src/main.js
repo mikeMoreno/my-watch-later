@@ -7,7 +7,7 @@ import Utils from "./utils.js";
 // @version      1.0.0
 // @description  A YouTube Watch Later feature that you own
 // @author       Michael Moreno
-// @homepageURL  https://greasyfork.org
+// @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
 // @match        https://www.youtube.com/*
 // @match        https://www.youtube.com/watch*
 // @grant        GM.getValue
