@@ -236,7 +236,13 @@ async function addToWatchlistAsync() {
     dateAdded: Date.now(),
   };
 
-  watchlist.push(newVideo);
+  const sortDirection = await getCurrentSortDirectionAsync();
+
+  if (sortDirection === "Ascending") {
+    watchlist.push(newVideo);
+  } else {
+    watchlist.unshift(newVideo);
+  }
 
   await saveWatchlistAsync(watchlist);
 
