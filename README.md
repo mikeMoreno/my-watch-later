@@ -1,10 +1,10 @@
 # My Watch Later
 
-YouTube's Watch Later feature is nice, but it's not ideal that you don't "own" it.
+YouTube's Watch Later feature is nice, but you don't "own" it.
 
 You end up building something that you don't own the data to.
 
-The problem with this is if they decide to remove a video from YouTube,
+If YouTube decides to remove a video from their site,
 the video gets removed from your Watch Later without your consent.
 
 This [userscript](https://en.wikipedia.org/wiki/Userscript) gives you your own Watch Later
