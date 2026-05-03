@@ -147,7 +147,7 @@ class Utils {
       return null;
     }
 
-    if (url.indexOf("&") > 0) {
+    if (url.includes("&")) {
       url = url.slice(0, url.indexOf("&"));
     }
 
