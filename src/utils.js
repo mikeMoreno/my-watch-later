@@ -17,7 +17,7 @@ class Utils {
       return null;
     }
 
-    if (url.indexOf("&") > 0) {
+    if (url.includes("&")) {
       url = url.slice(0, url.indexOf("&"));
     }
 
@@ -34,7 +34,8 @@ class Utils {
 
   static async getCurrentSortDirectionAsync() {
     /* eslint-disable no-undef */
-    const sortDirection = (await GM.getValue(Utils.SortDirectionKey)) ?? "Ascending";
+    const sortDirection =
+      (await GM.getValue(Utils.SortDirectionKey)) ?? "Ascending";
     /* eslint-enable no-undef */
 
     return sortDirection;
