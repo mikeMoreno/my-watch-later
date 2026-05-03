@@ -55,7 +55,7 @@ class WatchLaterPopup {
       <button id="export-watchlist">Export</button>
       <button id="close-watchlist-top">Close</button>
     </div>
-    <h2 id="videoCount">${watchlist.length} videos</h2>
+    <h2 id="videoCount"></h2>
     <ul id="watchlist-videos"></ul>
     <button id="close-watchlist-bottom" style="margin-top:10px">Close</button>
 </div>
@@ -87,6 +87,14 @@ class WatchLaterPopup {
       .addEventListener("click", async () => {
         await WatchList.exportWatchlistAsync();
       });
+
+    const videoCountElement = document.getElementById("videoCount");
+
+    if (watchlist.length === 1) {
+      videoCountElement.innerText = `${watchlist.length} video`;
+    } else {
+      videoCountElement.innerText = `${watchlist.length} videos`;
+    }
 
     WatchLaterPopup.populateListUI(watchlist);
   }
