@@ -32,6 +32,3 @@ From there you can see the current version of the userscript, a sort button, and
 As you watch videos, you can either remove them from the list or archive them.
 
 Note: There's currently no way to access videos you have archived, but this feature will be built out in the future.
-
-
-
