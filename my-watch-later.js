@@ -200,6 +200,12 @@ class WatchLaterPopup {
   }
 
   static async openWatchLaterAsync() {
+    const previouslyExistingPopup = document.getElementById("my-watchlist");
+
+    if (previouslyExistingPopup) {
+      return;
+    }
+
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     const watchlist = await WatchList.loadWatchlistAsync();

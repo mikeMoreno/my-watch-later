@@ -28,11 +28,17 @@ class WatchLaterPopup {
   }
 
   static async openWatchLaterAsync() {
+    const previouslyExistingPopup = document.getElementById("my-watchlist");
+
+    if (previouslyExistingPopup) {
+      return;
+    }
+
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     const watchlist = await WatchList.loadWatchlistAsync();
 
-/* eslint-disable no-undef */
+    /* eslint-disable no-undef */
     const watchlistPopup = `
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
@@ -54,7 +60,7 @@ class WatchLaterPopup {
     <button id="close-watchlist-bottom" style="margin-top:10px">Close</button>
 </div>
 `;
-/* eslint-enable no-undef */
+    /* eslint-enable no-undef */
 
     document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
