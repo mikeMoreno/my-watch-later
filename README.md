@@ -18,3 +18,20 @@ It's available on [Greasy Fork](https://greasyfork.org/en/scripts/576490-my-watc
 Don't expect anything flashy, it's for my own personal use first and foremost.
 
 That being said, feel free to use and contribute!
+
+## How it Works
+
+The userscript will place a button to open the watchlist to the right of the YouTube logo.
+
+When you click that button, the watchlist opens as a modal dialog in the center of the screen.
+
+<img width="600px" src="https://codeberg.org/michaelmoreno/my-watch-later/raw/branch/master/assets/watchlist_screenshot.png"/>
+
+From there you can see the current version of the userscript, a sort button, and the option to export your watchlist in JSON format.
+
+As you watch videos, you can either remove them from the list or archive them.
+
+Note: There's currently no way to access videos you have archived, but this feature will be built out in the future.
+
+
+
