@@ -12,7 +12,6 @@ import Utils from "./utils.js";
 // @match        https://www.youtube.com/watch*
 // @grant        GM.getValue
 // @grant        GM.setValue
-// @grant        GM_openInTab
 // @license      GPL-3.0
 // ==/UserScript==
 
