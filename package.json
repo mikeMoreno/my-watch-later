@@ -23,7 +23,8 @@
   },
   "homepage": "https://codeberg.org/michaelmoreno/my-watch-later#readme",
   "dependencies": {
-    "eslint": "^9.39.4",
+    "eslint": "^9.22.0",
+    "eslint-config-eslint": "^11.0.0",
     "eslint-config-prettier": "^10.1.8",
     "jest": "^30.3.0",
     "prettier": "^3.8.3"
