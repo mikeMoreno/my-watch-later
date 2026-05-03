@@ -16,9 +16,12 @@ import Utils from "./utils.js";
 // @license      GPL-3.0
 // ==/UserScript==
 
+/* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.0";
+/* eslint-enable no-unused-vars */
 
+// eslint-disable-next-line no-unused-vars
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
 

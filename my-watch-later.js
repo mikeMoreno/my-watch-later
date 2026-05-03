@@ -15,9 +15,12 @@
 
 "use strict";
 
+/* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.0";
+/* eslint-enable no-unused-vars */
 
+// eslint-disable-next-line no-unused-vars
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
 
@@ -80,9 +83,9 @@ class ArchiveList {
       return;
     }
 
-    const videoToArchive = watchlist.filter(
+    const videoToArchive = watchlist.find(
       (v, index) => index === indexToArchive,
-    )[0];
+    );
 
     const newWatchlist = watchlist.filter(
       (v, index) => index !== indexToArchive,
@@ -107,6 +110,7 @@ class ArchiveList {
 
     let archivedVideos = "";
 
+    /* eslint-disable prefer-template */
     for (let i = 0; i < archiveList.length; i++) {
       archivedVideos += archiveList[i].title + "\n";
       archivedVideos += archiveList[i].url + "\n";
@@ -114,6 +118,7 @@ class ArchiveList {
       archivedVideos += archiveList[i].dateAdded + "\n";
       archivedVideos += "====\n";
     }
+    /* eslint-enable prefer-template */
 
     alert(archivedVideos);
   }
@@ -123,12 +128,12 @@ class Utils {
   static SortDirectionKey = "sortDirection";
 
   static removeElementById(id) {
-    var element = document.getElementById(id);
+    const element = document.getElementById(id);
     element.parentNode.removeChild(element);
   }
 
   static getIdPortionOfVideoUrl(url) {
-    return url.substring(url.indexOf("?v=") + 3);
+    return url.slice(url.indexOf("?v=") + 3);
   }
 
   static getCurrentVideoUrl() {
@@ -139,14 +144,14 @@ class Utils {
     }
 
     if (url.indexOf("&") > 0) {
-      url = url.substring(0, url.indexOf("&"));
+      url = url.slice(0, url.indexOf("&"));
     }
 
     return url;
   }
 
   static isVideoUrl(url) {
-    if (url == null || url.indexOf("watch?v=") < 0) {
+    if (url == null || !url.includes("watch?v=")) {
       return false;
     }
 
@@ -176,13 +181,9 @@ class WatchLaterPopup {
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     if (sortDirection === "Ascending") {
-      watchlist.sort(function (videoA, videoB) {
-        return videoB.dateAdded - videoA.dateAdded;
-      });
+      watchlist.sort((videoA, videoB) => videoB.dateAdded - videoA.dateAdded);
     } else {
-      watchlist.sort(function (videoA, videoB) {
-        return videoA.dateAdded - videoB.dateAdded;
-      });
+      watchlist.sort((videoA, videoB) => videoA.dateAdded - videoB.dateAdded);
     }
 
     const nextDirection =
@@ -194,7 +195,7 @@ class WatchLaterPopup {
 
     WatchLaterPopup.populateListUI(watchlist);
 
-    var changeSortBtn = document.getElementById("change-sort-direction");
+    const changeSortBtn = document.getElementById("change-sort-direction");
     changeSortBtn.innerText = `Sort: ${nextDirection}`;
   }
 
@@ -203,6 +204,7 @@ class WatchLaterPopup {
 
     const watchlist = await WatchList.loadWatchlistAsync();
 
+    /* eslint-disable no-undef */
     const watchlistPopup = `
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
@@ -224,6 +226,7 @@ class WatchLaterPopup {
     <button id="close-watchlist-bottom" style="margin-top:10px">Close</button>
 </div>
 `;
+    /* eslint-enable no-undef */
 
     document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
@@ -337,13 +340,13 @@ class WatchList {
     const ownerElement = document.getElementById("owner");
 
     const channel = ownerElement.innerText
-      .substring(0, ownerElement.innerText.indexOf("\n"))
+      .slice(0, ownerElement.innerText.indexOf("\n"))
       .trim();
 
     const newVideo = {
-      title: title,
-      url: url,
-      channel: channel,
+      title,
+      url,
+      channel,
       dateAdded: Date.now(),
     };
 

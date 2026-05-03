@@ -29,9 +29,9 @@ class ArchiveList {
       return;
     }
 
-    const videoToArchive = watchlist.filter(
+    const videoToArchive = watchlist.find(
       (v, index) => index === indexToArchive,
-    )[0];
+    );
 
     const newWatchlist = watchlist.filter(
       (v, index) => index !== indexToArchive,
@@ -56,6 +56,7 @@ class ArchiveList {
 
     let archivedVideos = "";
 
+    /* eslint-disable prefer-template */
     for (let i = 0; i < archiveList.length; i++) {
       archivedVideos += archiveList[i].title + "\n";
       archivedVideos += archiveList[i].url + "\n";
@@ -63,6 +64,7 @@ class ArchiveList {
       archivedVideos += archiveList[i].dateAdded + "\n";
       archivedVideos += "====\n";
     }
+    /* eslint-enable prefer-template */
 
     alert(archivedVideos);
   }

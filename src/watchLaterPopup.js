@@ -9,13 +9,9 @@ class WatchLaterPopup {
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     if (sortDirection === "Ascending") {
-      watchlist.sort(function (videoA, videoB) {
-        return videoB.dateAdded - videoA.dateAdded;
-      });
+      watchlist.sort((videoA, videoB) => videoB.dateAdded - videoA.dateAdded);
     } else {
-      watchlist.sort(function (videoA, videoB) {
-        return videoA.dateAdded - videoB.dateAdded;
-      });
+      watchlist.sort((videoA, videoB) => videoA.dateAdded - videoB.dateAdded);
     }
 
     const nextDirection =
@@ -27,7 +23,7 @@ class WatchLaterPopup {
 
     WatchLaterPopup.populateListUI(watchlist);
 
-    var changeSortBtn = document.getElementById("change-sort-direction");
+    const changeSortBtn = document.getElementById("change-sort-direction");
     changeSortBtn.innerText = `Sort: ${nextDirection}`;
   }
 
@@ -36,6 +32,7 @@ class WatchLaterPopup {
 
     const watchlist = await WatchList.loadWatchlistAsync();
 
+/* eslint-disable no-undef */
     const watchlistPopup = `
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
@@ -57,6 +54,7 @@ class WatchLaterPopup {
     <button id="close-watchlist-bottom" style="margin-top:10px">Close</button>
 </div>
 `;
+/* eslint-enable no-undef */
 
     document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 

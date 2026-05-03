@@ -2,12 +2,12 @@ class Utils {
   static SortDirectionKey = "sortDirection";
 
   static removeElementById(id) {
-    var element = document.getElementById(id);
+    const element = document.getElementById(id);
     element.parentNode.removeChild(element);
   }
 
   static getIdPortionOfVideoUrl(url) {
-    return url.substring(url.indexOf("?v=") + 3);
+    return url.slice(url.indexOf("?v=") + 3);
   }
 
   static getCurrentVideoUrl() {
@@ -18,14 +18,14 @@ class Utils {
     }
 
     if (url.indexOf("&") > 0) {
-      url = url.substring(0, url.indexOf("&"));
+      url = url.slice(0, url.indexOf("&"));
     }
 
     return url;
   }
 
   static isVideoUrl(url) {
-    if (url == null || url.indexOf("watch?v=") < 0) {
+    if (url == null || !url.includes("watch?v=")) {
       return false;
     }
 

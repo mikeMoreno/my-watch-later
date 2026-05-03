@@ -50,13 +50,13 @@ class WatchList {
     const ownerElement = document.getElementById("owner");
 
     const channel = ownerElement.innerText
-      .substring(0, ownerElement.innerText.indexOf("\n"))
+      .slice(0, ownerElement.innerText.indexOf("\n"))
       .trim();
 
     const newVideo = {
-      title: title,
-      url: url,
-      channel: channel,
+      title,
+      url,
+      channel,
       dateAdded: Date.now(),
     };
 

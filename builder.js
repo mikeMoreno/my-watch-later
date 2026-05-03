@@ -1,25 +1,4 @@
-import * as fs from "fs";
-
-let finalOutput = "";
-
-let mainContent = getFileContents("src/main.js");
-mainContent = insertUseStrict(mainContent);
-
-finalOutput += mainContent;
-
-const files = fs
-  .readdirSync("src", { recursive: true })
-  .filter((f) => f.endsWith(".js"))
-  .filter((f) => f !== "main.js")
-  .sort();
-
-for (const file of files) {
-  finalOutput += getFileContents(`src/${file}`);
-}
-
-finalOutput += "main();\n";
-
-fs.writeFileSync("my-watch-later.js", finalOutput);
+import * as fs from "node:fs";
 
 function getFileContents(file) {
   const content = fs.readFileSync(file, { encoding: "utf8" });
@@ -70,3 +49,24 @@ function insertUseStrict(mainContent) {
 
   return results;
 }
+
+let finalOutput = "";
+
+let mainContent = getFileContents("src/main.js");
+mainContent = insertUseStrict(mainContent);
+
+finalOutput += mainContent;
+
+const files = fs
+  .readdirSync("src", { recursive: true })
+  .filter((f) => f.endsWith(".js"))
+  .filter((f) => f !== "main.js")
+  .sort();
+
+for (const file of files) {
+  finalOutput += getFileContents(`src/${file}`);
+}
+
+finalOutput += "main();\n";
+
+fs.writeFileSync("my-watch-later.js", finalOutput);
