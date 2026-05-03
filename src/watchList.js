@@ -54,6 +54,7 @@ class WatchList {
       .trim();
 
     const newVideo = {
+      id: crypto.randomUUID(),
       title,
       url,
       channel,
@@ -73,20 +74,18 @@ class WatchList {
     alert("Video added");
   }
 
-  static async removeVideoAsync(indexToRemove) {
+  static async removeVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
     if (watchlist.length === 0) {
       return;
     }
 
-    const newWatchlist = watchlist.filter(
-      (v, index) => index !== indexToRemove,
-    );
+    const newWatchlist = watchlist.filter((v) => v.id !== id);
 
     await WatchList.saveWatchlistAsync(newWatchlist);
 
-    Utils.removeElementById(`watchlist-video-${indexToRemove}`);
+    Utils.removeElementById(`watchlist-video-${id}`);
 
     const videoCountElement = document.getElementById("videoCount");
     videoCountElement.innerText = `${newWatchlist.length} videos`;
