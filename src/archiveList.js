@@ -1,66 +1,74 @@
-import { loadWatchlistAsync, saveWatchlistAsync } from "./watchList.js";
-import { removeElementById } from "./utils.js";
+import WatchList from "./watchList.js";
+import Utils from "./utils.js";
 
-async function loadArchiveListAsync() {
-  /* eslint-disable no-undef */
-  const archiveList = (await GM.getValue(ArchiveList)) ?? "";
-  /* eslint-enable no-undef */
+class ArchiveList {
+  static ArchiveListKey = "archiveList";
 
-  if (archiveList == null || archiveList === "") {
-    return [];
+  static async loadArchiveListAsync() {
+    /* eslint-disable no-undef */
+    const archiveList = (await GM.getValue(ArchiveList.ArchiveListKey)) ?? "";
+    /* eslint-enable no-undef */
+
+    if (archiveList == null || archiveList === "") {
+      return [];
+    }
+
+    return JSON.parse(archiveList);
   }
 
-  return JSON.parse(archiveList);
-}
-
-async function saveArchiveListAsync(archiveList) {
-  /* eslint-disable no-undef */
-  await GM.setValue(ArchiveList, JSON.stringify(archiveList));
-  /* eslint-enable no-undef */
-}
-
-async function archiveVideoAsync(indexToArchive) {
-  const watchlist = await loadWatchlistAsync();
-
-  if (watchlist.length === 0) {
-    return;
+  static async saveArchiveListAsync(archiveList) {
+    /* eslint-disable no-undef */
+    await GM.setValue(ArchiveList.ArchiveListKey, JSON.stringify(archiveList));
+    /* eslint-enable no-undef */
   }
 
-  const videoToArchive = watchlist.filter(
-    (v, index) => index === indexToArchive,
-  )[0];
+  static async archiveVideoAsync(indexToArchive) {
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  const newWatchlist = watchlist.filter((v, index) => index !== indexToArchive);
+    if (watchlist.length === 0) {
+      return;
+    }
 
-  await saveWatchlistAsync(newWatchlist);
+    const videoToArchive = watchlist.filter(
+      (v, index) => index === indexToArchive,
+    )[0];
 
-  removeElementById(`watchlist-video-${indexToArchive}`);
+    const newWatchlist = watchlist.filter(
+      (v, index) => index !== indexToArchive,
+    );
 
-  var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-  modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+    await WatchList.saveWatchlistAsync(newWatchlist);
 
-  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-  addToWatchlistBtn.disabled = false;
+    Utils.removeElementById(`watchlist-video-${indexToArchive}`);
 
-  const archiveList = await loadArchiveListAsync();
+    var modalWatchlistTitle = document.getElementById("my-watchlist-title");
+    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
 
-  archiveList.push(videoToArchive);
+    const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+    addToWatchlistBtn.disabled = false;
 
-  await saveArchiveListAsync(archiveList);
-}
+    const archiveList = await ArchiveList.loadArchiveListAsync();
 
-async function viewArchiveAsync() {
-  const archiveList = await loadArchiveListAsync();
+    archiveList.push(videoToArchive);
 
-  let archivedVideos = "";
-
-  for (let i = 0; i < archiveList.length; i++) {
-    archivedVideos += archiveList[i].title + "\n";
-    archivedVideos += archiveList[i].url + "\n";
-    archivedVideos += archiveList[i].channel + "\n";
-    archivedVideos += archiveList[i].dateAdded + "\n";
-    archivedVideos += "====\n";
+    await ArchiveList.saveArchiveListAsync(archiveList);
   }
 
-  alert(archivedVideos);
+  static async viewArchiveAsync() {
+    const archiveList = await ArchiveList.loadArchiveListAsync();
+
+    let archivedVideos = "";
+
+    for (let i = 0; i < archiveList.length; i++) {
+      archivedVideos += archiveList[i].title + "\n";
+      archivedVideos += archiveList[i].url + "\n";
+      archivedVideos += archiveList[i].channel + "\n";
+      archivedVideos += archiveList[i].dateAdded + "\n";
+      archivedVideos += "====\n";
+    }
+
+    alert(archivedVideos);
+  }
 }
+
+export default ArchiveList;

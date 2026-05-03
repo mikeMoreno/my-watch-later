@@ -1,6 +1,6 @@
-import { openWatchLaterAsync } from "./watchLaterPopup.js";
-import { addToWatchlistAsync } from "./watchList.js";
-import { isVideoUrl, removeElementById } from "./utils.js";
+import WatchLaterPopup from "./watchLaterPopup.js";
+import WatchList from "./watchList.js";
+import Utils from "./utils.js";
 // ==UserScript==
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
@@ -18,9 +18,6 @@ import { isVideoUrl, removeElementById } from "./utils.js";
 
 const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.0";
-const ArchiveList = "archiveList";
-const WatchList = "watchlist";
-const SortDirection = "sortDirection";
 
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
@@ -28,7 +25,7 @@ async function main() {
   addToWatchlistBtn.innerText = "Add to My Watch Later";
   addToWatchlistBtn.id = "addVideoToWatchlist";
 
-  addToWatchlistBtn.addEventListener("click", addToWatchlistAsync);
+  addToWatchlistBtn.addEventListener("click", WatchList.addToWatchlistAsync);
 
   const ellipsisButton = document.getElementById("logo");
 
@@ -41,14 +38,14 @@ async function main() {
 
   openWatchLaterBtn.innerText = "Open My Watch Later";
 
-  openWatchLaterBtn.addEventListener("click", openWatchLaterAsync);
+  openWatchLaterBtn.addEventListener("click", WatchLaterPopup.openWatchLaterAsync);
 
   addToWatchlistBtn.parentNode.insertBefore(
     openWatchLaterBtn,
     addToWatchlistBtn.nextSibling,
   );
 
-  if (!isVideoUrl(window.location.href)) {
-    removeElementById("addVideoToWatchlist");
+  if (!Utils.isVideoUrl(window.location.href)) {
+    Utils.removeElementById("addVideoToWatchlist");
   }
 }

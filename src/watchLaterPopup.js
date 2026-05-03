@@ -1,41 +1,42 @@
-import { loadWatchlistAsync, saveWatchlistAsync, removeVideoAsync } from "./watchList.js";
-import { viewArchiveAsync, archiveVideoAsync } from "./archiveList.js";
-import { getCurrentSortDirectionAsync, setSortDirectionAsync, getIdPortionOfVideoUrl } from "./utils.js";
+import WatchList from "./watchList.js";
+import ArchiveList from "./archiveList.js";
+import Utils from "./utils.js";
 
-async function changeSortDirectionAsync() {
-  const watchlist = await loadWatchlistAsync();
+class WatchLaterPopup {
+  static async changeSortDirectionAsync() {
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  const sortDirection = await getCurrentSortDirectionAsync();
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
-  if (sortDirection === "Ascending") {
-    watchlist.sort(function (videoA, videoB) {
-      return videoB.dateAdded - videoA.dateAdded;
-    });
-  } else {
-    watchlist.sort(function (videoA, videoB) {
-      return videoA.dateAdded - videoB.dateAdded;
-    });
+    if (sortDirection === "Ascending") {
+      watchlist.sort(function (videoA, videoB) {
+        return videoB.dateAdded - videoA.dateAdded;
+      });
+    } else {
+      watchlist.sort(function (videoA, videoB) {
+        return videoA.dateAdded - videoB.dateAdded;
+      });
+    }
+
+    const nextDirection =
+      sortDirection === "Ascending" ? "Descending" : "Ascending";
+
+    await Utils.setSortDirectionAsync(nextDirection);
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    WatchLaterPopup.populateListUI(watchlist);
+
+    var changeSortBtn = document.getElementById("change-sort-direction");
+    changeSortBtn.innerText = `Sort: ${nextDirection}`;
   }
 
-  const nextDirection =
-    sortDirection === "Ascending" ? "Descending" : "Ascending";
+  static async openWatchLaterAsync() {
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
-  await setSortDirectionAsync(nextDirection);
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  await saveWatchlistAsync(watchlist);
-
-  populateListUI(watchlist);
-
-  var changeSortBtn = document.getElementById("change-sort-direction");
-  changeSortBtn.innerText = `Sort: ${nextDirection}`;
-}
-
-export async function openWatchLaterAsync() {
-  const sortDirection = await getCurrentSortDirectionAsync();
-
-  const watchlist = await loadWatchlistAsync();
-
-  const watchlistPopup = `
+    const watchlistPopup = `
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
     transform: translate(-50%, -50%);
@@ -54,63 +55,66 @@ export async function openWatchLaterAsync() {
 </div>
 `;
 
-  document.body.insertAdjacentHTML("beforeend", watchlistPopup);
+    document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
-  document
-    .getElementById("close-watchlist-top")
-    .addEventListener("click", () => {
-      document.getElementById("my-watchlist").remove();
-    });
+    document
+      .getElementById("close-watchlist-top")
+      .addEventListener("click", () => {
+        document.getElementById("my-watchlist").remove();
+      });
 
-  document
-    .getElementById("close-watchlist-bottom")
-    .addEventListener("click", () => {
-      document.getElementById("my-watchlist").remove();
-    });
+    document
+      .getElementById("close-watchlist-bottom")
+      .addEventListener("click", () => {
+        document.getElementById("my-watchlist").remove();
+      });
 
-  document
-    .getElementById("change-sort-direction")
-    .addEventListener("click", async () => {
-      await changeSortDirectionAsync();
-    });
+    document
+      .getElementById("change-sort-direction")
+      .addEventListener("click", async () => {
+        await WatchLaterPopup.changeSortDirectionAsync();
+      });
 
-  document
-    .getElementById("view-archive")
-    .addEventListener("click", async () => {
-      await viewArchiveAsync();
-    });
+    document
+      .getElementById("view-archive")
+      .addEventListener("click", async () => {
+        await ArchiveList.viewArchiveAsync();
+      });
 
-  populateListUI(watchlist);
-}
+    WatchLaterPopup.populateListUI(watchlist);
+  }
 
-export function populateListUI(watchlist) {
-  const watchlistVideos = document.getElementById("watchlist-videos");
+  static populateListUI(watchlist) {
+    const watchlistVideos = document.getElementById("watchlist-videos");
 
-  watchlistVideos.innerHTML = "";
+    watchlistVideos.innerHTML = "";
 
-  for (let i = 0; i < watchlist.length; i++) {
-    const url = watchlist[i].url;
+    for (let i = 0; i < watchlist.length; i++) {
+      const url = watchlist[i].url;
 
-    watchlistVideos.insertAdjacentHTML(
-      "beforeend",
-      `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
-      <img src="https://img.youtube.com/vi/${getIdPortionOfVideoUrl(url)}/default.jpg">
+      watchlistVideos.insertAdjacentHTML(
+        "beforeend",
+        `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
+      <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${watchlist[i].title}</a>
         <button id="remove-video-${i}" style="margin-right:10px">Remove</button>
         <button id="archive-video-${i}">Archive</button>
       </li>`,
-    );
+      );
 
-    document
-      .getElementById(`remove-video-${i}`)
-      .addEventListener("click", async () => {
-        await removeVideoAsync(i);
-      });
+      document
+        .getElementById(`remove-video-${i}`)
+        .addEventListener("click", async () => {
+          await WatchList.removeVideoAsync(i);
+        });
 
-    document
-      .getElementById(`archive-video-${i}`)
-      .addEventListener("click", async () => {
-        await archiveVideoAsync(i);
-      });
+      document
+        .getElementById(`archive-video-${i}`)
+        .addEventListener("click", async () => {
+          await ArchiveList.archiveVideoAsync(i);
+        });
+    }
   }
 }
+
+export default WatchLaterPopup;

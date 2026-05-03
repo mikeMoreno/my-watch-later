@@ -17,9 +17,6 @@
 
 const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.0";
-const ArchiveList = "archiveList";
-const WatchList = "watchlist";
-const SortDirection = "sortDirection";
 
 async function main() {
   const addToWatchlistBtn = document.createElement("button");
@@ -27,7 +24,7 @@ async function main() {
   addToWatchlistBtn.innerText = "Add to My Watch Later";
   addToWatchlistBtn.id = "addVideoToWatchlist";
 
-  addToWatchlistBtn.addEventListener("click", addToWatchlistAsync);
+  addToWatchlistBtn.addEventListener("click", WatchList.addToWatchlistAsync);
 
   const ellipsisButton = document.getElementById("logo");
 
@@ -40,161 +37,176 @@ async function main() {
 
   openWatchLaterBtn.innerText = "Open My Watch Later";
 
-  openWatchLaterBtn.addEventListener("click", openWatchLaterAsync);
+  openWatchLaterBtn.addEventListener(
+    "click",
+    WatchLaterPopup.openWatchLaterAsync,
+  );
 
   addToWatchlistBtn.parentNode.insertBefore(
     openWatchLaterBtn,
     addToWatchlistBtn.nextSibling,
   );
 
-  if (!isVideoUrl(window.location.href)) {
-    removeElementById("addVideoToWatchlist");
+  if (!Utils.isVideoUrl(window.location.href)) {
+    Utils.removeElementById("addVideoToWatchlist");
   }
 }
 
-async function loadArchiveListAsync() {
-  /* eslint-disable no-undef */
-  const archiveList = (await GM.getValue(ArchiveList)) ?? "";
-  /* eslint-enable no-undef */
+class ArchiveList {
+  static ArchiveListKey = "archiveList";
 
-  if (archiveList == null || archiveList === "") {
-    return [];
+  static async loadArchiveListAsync() {
+    /* eslint-disable no-undef */
+    const archiveList = (await GM.getValue(ArchiveList.ArchiveListKey)) ?? "";
+    /* eslint-enable no-undef */
+
+    if (archiveList == null || archiveList === "") {
+      return [];
+    }
+
+    return JSON.parse(archiveList);
   }
 
-  return JSON.parse(archiveList);
-}
-
-async function saveArchiveListAsync(archiveList) {
-  /* eslint-disable no-undef */
-  await GM.setValue(ArchiveList, JSON.stringify(archiveList));
-  /* eslint-enable no-undef */
-}
-
-async function archiveVideoAsync(indexToArchive) {
-  const watchlist = await loadWatchlistAsync();
-
-  if (watchlist.length === 0) {
-    return;
+  static async saveArchiveListAsync(archiveList) {
+    /* eslint-disable no-undef */
+    await GM.setValue(ArchiveList.ArchiveListKey, JSON.stringify(archiveList));
+    /* eslint-enable no-undef */
   }
 
-  const videoToArchive = watchlist.filter(
-    (v, index) => index === indexToArchive,
-  )[0];
+  static async archiveVideoAsync(indexToArchive) {
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  const newWatchlist = watchlist.filter((v, index) => index !== indexToArchive);
+    if (watchlist.length === 0) {
+      return;
+    }
 
-  await saveWatchlistAsync(newWatchlist);
+    const videoToArchive = watchlist.filter(
+      (v, index) => index === indexToArchive,
+    )[0];
 
-  removeElementById(`watchlist-video-${indexToArchive}`);
+    const newWatchlist = watchlist.filter(
+      (v, index) => index !== indexToArchive,
+    );
 
-  var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-  modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
+    await WatchList.saveWatchlistAsync(newWatchlist);
 
-  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-  addToWatchlistBtn.disabled = false;
+    Utils.removeElementById(`watchlist-video-${indexToArchive}`);
 
-  const archiveList = await loadArchiveListAsync();
+    var modalWatchlistTitle = document.getElementById("my-watchlist-title");
+    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
 
-  archiveList.push(videoToArchive);
+    const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+    addToWatchlistBtn.disabled = false;
 
-  await saveArchiveListAsync(archiveList);
-}
+    const archiveList = await ArchiveList.loadArchiveListAsync();
 
-async function viewArchiveAsync() {
-  const archiveList = await loadArchiveListAsync();
+    archiveList.push(videoToArchive);
 
-  let archivedVideos = "";
-
-  for (let i = 0; i < archiveList.length; i++) {
-    archivedVideos += archiveList[i].title + "\n";
-    archivedVideos += archiveList[i].url + "\n";
-    archivedVideos += archiveList[i].channel + "\n";
-    archivedVideos += archiveList[i].dateAdded + "\n";
-    archivedVideos += "====\n";
+    await ArchiveList.saveArchiveListAsync(archiveList);
   }
 
-  alert(archivedVideos);
+  static async viewArchiveAsync() {
+    const archiveList = await ArchiveList.loadArchiveListAsync();
+
+    let archivedVideos = "";
+
+    for (let i = 0; i < archiveList.length; i++) {
+      archivedVideos += archiveList[i].title + "\n";
+      archivedVideos += archiveList[i].url + "\n";
+      archivedVideos += archiveList[i].channel + "\n";
+      archivedVideos += archiveList[i].dateAdded + "\n";
+      archivedVideos += "====\n";
+    }
+
+    alert(archivedVideos);
+  }
 }
 
-export function removeElementById(id) {
-  var element = document.getElementById(id);
-  element.parentNode.removeChild(element);
-}
+class Utils {
+  static SortDirectionKey = "sortDirection";
 
-export function getIdPortionOfVideoUrl(url) {
-  return url.substring(url.indexOf("?v=") + 3);
-}
-
-export function getCurrentVideoUrl() {
-  let url = window.location.href;
-
-  if (!isVideoUrl(url)) {
-    return null;
+  static removeElementById(id) {
+    var element = document.getElementById(id);
+    element.parentNode.removeChild(element);
   }
 
-  if (url.indexOf("&") > 0) {
-    url = url.substring(0, url.indexOf("&"));
+  static getIdPortionOfVideoUrl(url) {
+    return url.substring(url.indexOf("?v=") + 3);
   }
 
-  return url;
-}
+  static getCurrentVideoUrl() {
+    let url = window.location.href;
 
-export function isVideoUrl(url) {
-  if (url == null || url.indexOf("watch?v=") < 0) {
-    return false;
+    if (!Utils.isVideoUrl(url)) {
+      return null;
+    }
+
+    if (url.indexOf("&") > 0) {
+      url = url.substring(0, url.indexOf("&"));
+    }
+
+    return url;
   }
 
-  return true;
-}
+  static isVideoUrl(url) {
+    if (url == null || url.indexOf("watch?v=") < 0) {
+      return false;
+    }
 
-export async function getCurrentSortDirectionAsync() {
-  /* eslint-disable no-undef */
-  const sortDirection = (await GM.getValue(SortDirection)) ?? "Ascending";
-  /* eslint-enable no-undef */
-
-  return sortDirection;
-}
-
-export async function setSortDirectionAsync(nextDirection) {
-  /* eslint-disable no-undef */
-  await GM.setValue(SortDirection, nextDirection);
-  /* eslint-enable no-undef */
-}
-
-async function changeSortDirectionAsync() {
-  const watchlist = await loadWatchlistAsync();
-
-  const sortDirection = await getCurrentSortDirectionAsync();
-
-  if (sortDirection === "Ascending") {
-    watchlist.sort(function (videoA, videoB) {
-      return videoB.dateAdded - videoA.dateAdded;
-    });
-  } else {
-    watchlist.sort(function (videoA, videoB) {
-      return videoA.dateAdded - videoB.dateAdded;
-    });
+    return true;
   }
 
-  const nextDirection =
-    sortDirection === "Ascending" ? "Descending" : "Ascending";
+  static async getCurrentSortDirectionAsync() {
+    /* eslint-disable no-undef */
+    const sortDirection =
+      (await GM.getValue(Utils.SortDirectionKey)) ?? "Ascending";
+    /* eslint-enable no-undef */
 
-  await setSortDirectionAsync(nextDirection);
+    return sortDirection;
+  }
 
-  await saveWatchlistAsync(watchlist);
-
-  populateListUI(watchlist);
-
-  var changeSortBtn = document.getElementById("change-sort-direction");
-  changeSortBtn.innerText = `Sort: ${nextDirection}`;
+  static async setSortDirectionAsync(nextDirection) {
+    /* eslint-disable no-undef */
+    await GM.setValue(Utils.SortDirectionKey, nextDirection);
+    /* eslint-enable no-undef */
+  }
 }
 
-export async function openWatchLaterAsync() {
-  const sortDirection = await getCurrentSortDirectionAsync();
+class WatchLaterPopup {
+  static async changeSortDirectionAsync() {
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  const watchlist = await loadWatchlistAsync();
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
-  const watchlistPopup = `
+    if (sortDirection === "Ascending") {
+      watchlist.sort(function (videoA, videoB) {
+        return videoB.dateAdded - videoA.dateAdded;
+      });
+    } else {
+      watchlist.sort(function (videoA, videoB) {
+        return videoA.dateAdded - videoB.dateAdded;
+      });
+    }
+
+    const nextDirection =
+      sortDirection === "Ascending" ? "Descending" : "Ascending";
+
+    await Utils.setSortDirectionAsync(nextDirection);
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    WatchLaterPopup.populateListUI(watchlist);
+
+    var changeSortBtn = document.getElementById("change-sort-direction");
+    changeSortBtn.innerText = `Sort: ${nextDirection}`;
+  }
+
+  static async openWatchLaterAsync() {
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
+
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const watchlistPopup = `
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%; 
     transform: translate(-50%, -50%);
@@ -213,165 +225,172 @@ export async function openWatchLaterAsync() {
 </div>
 `;
 
-  document.body.insertAdjacentHTML("beforeend", watchlistPopup);
+    document.body.insertAdjacentHTML("beforeend", watchlistPopup);
 
-  document
-    .getElementById("close-watchlist-top")
-    .addEventListener("click", () => {
-      document.getElementById("my-watchlist").remove();
-    });
+    document
+      .getElementById("close-watchlist-top")
+      .addEventListener("click", () => {
+        document.getElementById("my-watchlist").remove();
+      });
 
-  document
-    .getElementById("close-watchlist-bottom")
-    .addEventListener("click", () => {
-      document.getElementById("my-watchlist").remove();
-    });
+    document
+      .getElementById("close-watchlist-bottom")
+      .addEventListener("click", () => {
+        document.getElementById("my-watchlist").remove();
+      });
 
-  document
-    .getElementById("change-sort-direction")
-    .addEventListener("click", async () => {
-      await changeSortDirectionAsync();
-    });
+    document
+      .getElementById("change-sort-direction")
+      .addEventListener("click", async () => {
+        await WatchLaterPopup.changeSortDirectionAsync();
+      });
 
-  document
-    .getElementById("view-archive")
-    .addEventListener("click", async () => {
-      await viewArchiveAsync();
-    });
+    document
+      .getElementById("view-archive")
+      .addEventListener("click", async () => {
+        await ArchiveList.viewArchiveAsync();
+      });
 
-  populateListUI(watchlist);
-}
+    WatchLaterPopup.populateListUI(watchlist);
+  }
 
-export function populateListUI(watchlist) {
-  const watchlistVideos = document.getElementById("watchlist-videos");
+  static populateListUI(watchlist) {
+    const watchlistVideos = document.getElementById("watchlist-videos");
 
-  watchlistVideos.innerHTML = "";
+    watchlistVideos.innerHTML = "";
 
-  for (let i = 0; i < watchlist.length; i++) {
-    const url = watchlist[i].url;
+    for (let i = 0; i < watchlist.length; i++) {
+      const url = watchlist[i].url;
 
-    watchlistVideos.insertAdjacentHTML(
-      "beforeend",
-      `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
-      <img src="https://img.youtube.com/vi/${getIdPortionOfVideoUrl(url)}/default.jpg">
+      watchlistVideos.insertAdjacentHTML(
+        "beforeend",
+        `<li id="watchlist-video-${i}" style="margin-top:10px;display: flex;align-items:center">
+      <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${watchlist[i].title}</a>
         <button id="remove-video-${i}" style="margin-right:10px">Remove</button>
         <button id="archive-video-${i}">Archive</button>
       </li>`,
+      );
+
+      document
+        .getElementById(`remove-video-${i}`)
+        .addEventListener("click", async () => {
+          await WatchList.removeVideoAsync(i);
+        });
+
+      document
+        .getElementById(`archive-video-${i}`)
+        .addEventListener("click", async () => {
+          await ArchiveList.archiveVideoAsync(i);
+        });
+    }
+  }
+}
+
+class WatchList {
+  static WatchListKey = "watchlist";
+
+  static async loadWatchlistAsync() {
+    /* eslint-disable no-undef */
+    const watchlist = (await GM.getValue(WatchList.WatchListKey)) ?? "";
+    /* eslint-enable no-undef */
+
+    if (watchlist == null || watchlist === "") {
+      return [];
+    }
+
+    const parsedWatchlist = JSON.parse(watchlist);
+
+    const parsedWatchlistWithDates = parsedWatchlist.map((video) => ({
+      ...video,
+      dateAdded: new Date(video.dateAdded),
+    }));
+
+    return parsedWatchlistWithDates;
+  }
+
+  static async saveWatchlistAsync(watchlist) {
+    /* eslint-disable no-undef */
+    await GM.setValue(WatchList.WatchListKey, JSON.stringify(watchlist));
+    /* eslint-enable no-undef */
+  }
+
+  static async addToWatchlistAsync() {
+    const url = Utils.getCurrentVideoUrl();
+
+    if (url == null) {
+      alert("This doesn't look like a video");
+      return;
+    }
+
+    if (await WatchList.isVideoInWatchlistAsync(url)) {
+      alert("We already had that video");
+      return;
+    }
+
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const titleElement = document.getElementById("title");
+
+    const title = titleElement.innerText.trim();
+
+    const ownerElement = document.getElementById("owner");
+
+    const channel = ownerElement.innerText
+      .substring(0, ownerElement.innerText.indexOf("\n"))
+      .trim();
+
+    const newVideo = {
+      title: title,
+      url: url,
+      channel: channel,
+      dateAdded: Date.now(),
+    };
+
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
+
+    if (sortDirection === "Ascending") {
+      watchlist.push(newVideo);
+    } else {
+      watchlist.unshift(newVideo);
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    alert("Video added");
+  }
+
+  static async removeVideoAsync(indexToRemove) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    if (watchlist.length === 0) {
+      return;
+    }
+
+    const newWatchlist = watchlist.filter(
+      (v, index) => index !== indexToRemove,
     );
 
-    document
-      .getElementById(`remove-video-${i}`)
-      .addEventListener("click", async () => {
-        await removeVideoAsync(i);
-      });
+    await WatchList.saveWatchlistAsync(newWatchlist);
 
-    document
-      .getElementById(`archive-video-${i}`)
-      .addEventListener("click", async () => {
-        await archiveVideoAsync(i);
-      });
-  }
-}
+    Utils.removeElementById(`watchlist-video-${indexToRemove}`);
 
-export async function loadWatchlistAsync() {
-  /* eslint-disable no-undef */
-  const watchlist = (await GM.getValue(WatchList)) ?? "";
-  /* eslint-enable no-undef */
+    var modalWatchlistTitle = document.getElementById("my-watchlist-title");
+    modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
 
-  if (watchlist == null || watchlist === "") {
-    return [];
+    const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
+    addToWatchlistBtn.disabled = false;
   }
 
-  const parsedWatchlist = JSON.parse(watchlist);
+  static async isVideoInWatchlistAsync(url) {
+    const watchlist = await WatchList.loadWatchlistAsync();
 
-  const parsedWatchlistWithDates = parsedWatchlist.map((video) => ({
-    ...video,
-    dateAdded: new Date(video.dateAdded),
-  }));
+    if (watchlist.some((v) => v.url === url)) {
+      return true;
+    }
 
-  return parsedWatchlistWithDates;
-}
-
-async function saveWatchlistAsync(watchlist) {
-  /* eslint-disable no-undef */
-  await GM.setValue(WatchList, JSON.stringify(watchlist));
-  /* eslint-enable no-undef */
-}
-
-async function isVideoInWatchlistAsync(url) {
-  const watchlist = await loadWatchlistAsync();
-
-  if (watchlist.some((v) => v.url === url)) {
-    return true;
+    return false;
   }
-
-  return false;
-}
-
-export async function addToWatchlistAsync() {
-  const url = getCurrentVideoUrl();
-
-  if (url == null) {
-    alert("This doesn't look like a video");
-    return;
-  }
-
-  if (await isVideoInWatchlistAsync(url)) {
-    alert("We already had that video");
-    return;
-  }
-
-  const watchlist = await loadWatchlistAsync();
-
-  const titleElement = document.getElementById("title");
-
-  const title = titleElement.innerText.trim();
-
-  const ownerElement = document.getElementById("owner");
-
-  const channel = ownerElement.innerText
-    .substring(0, ownerElement.innerText.indexOf("\n"))
-    .trim();
-
-  const newVideo = {
-    title: title,
-    url: url,
-    channel: channel,
-    dateAdded: Date.now(),
-  };
-
-  const sortDirection = await getCurrentSortDirectionAsync();
-
-  if (sortDirection === "Ascending") {
-    watchlist.push(newVideo);
-  } else {
-    watchlist.unshift(newVideo);
-  }
-
-  await saveWatchlistAsync(watchlist);
-
-  alert("Video added");
-}
-
-export async function removeVideoAsync(indexToRemove) {
-  const watchlist = await loadWatchlistAsync();
-
-  if (watchlist.length === 0) {
-    return;
-  }
-
-  const newWatchlist = watchlist.filter((v, index) => index !== indexToRemove);
-
-  await saveWatchlistAsync(newWatchlist);
-
-  removeElementById(`watchlist-video-${indexToRemove}`);
-
-  var modalWatchlistTitle = document.getElementById("my-watchlist-title");
-  modalWatchlistTitle.innerText = `My Watchlist (${newWatchlist.length})`;
-
-  const addToWatchlistBtn = document.getElementById("addVideoToWatchlist");
-  addToWatchlistBtn.disabled = false;
 }
 
 main();
