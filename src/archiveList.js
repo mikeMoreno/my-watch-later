@@ -42,7 +42,12 @@ class ArchiveList {
     Utils.removeElementById(`watchlist-video-${indexToArchive}`);
 
     const videoCountElement = document.getElementById("videoCount");
-    videoCountElement.innerText = `${newWatchlist.length} videos`;
+    
+    if (newWatchlist.length === 1) {
+      videoCountElement.innerText = `${newWatchlist.length} video`;
+    } else {
+      videoCountElement.innerText = `${newWatchlist.length} videos`;
+    }
 
     const archiveList = await ArchiveList.loadArchiveListAsync();
 
