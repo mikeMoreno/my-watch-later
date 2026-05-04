@@ -19,39 +19,55 @@ const UserScriptName = "My Watch Later";
 const UserScriptVersion = "1.0.1";
 /* eslint-enable no-unused-vars */
 
+let buttonSet = new Set();
+
 // eslint-disable-next-line no-unused-vars
 async function main() {
-  const addToWatchlistBtn = document.createElement("button");
+  document.addEventListener("yt-navigate-finish", () => {
+    const addToWatchlistBtn = document.createElement("button");
 
-  addToWatchlistBtn.innerText = "Add to My Watch Later";
-  addToWatchlistBtn.id = "addVideoToWatchlist";
+    addToWatchlistBtn.innerText = "Add to My Watch Later";
+    addToWatchlistBtn.id = "addVideoToWatchlist";
 
-  addToWatchlistBtn.addEventListener("click", WatchList.addToWatchlistAsync);
+    addToWatchlistBtn.addEventListener("click", WatchList.addToWatchlistAsync);
 
-  const ellipsisButton = document.getElementById("logo");
+    const logoElement = document.getElementById("logo");
 
-  ellipsisButton.parentNode.insertBefore(
-    addToWatchlistBtn,
-    ellipsisButton.nextSibling,
-  );
+    if (!buttonSet.has("addToWatchlistBtn")) {
+      logoElement.parentNode.insertBefore(
+        addToWatchlistBtn,
+        logoElement.nextSibling,
+      );
 
-  const openWatchLaterBtn = document.createElement("button");
+      buttonSet.add("addToWatchlistBtn");
+    }
 
-  openWatchLaterBtn.innerText = "Open My Watch Later";
+    const addedButton = document.getElementById("addVideoToWatchlist");
 
-  openWatchLaterBtn.addEventListener(
-    "click",
-    WatchLaterPopup.openWatchLaterAsync,
-  );
+    const openWatchLaterBtn = document.createElement("button");
 
-  addToWatchlistBtn.parentNode.insertBefore(
-    openWatchLaterBtn,
-    addToWatchlistBtn.nextSibling,
-  );
+    openWatchLaterBtn.innerText = "Open My Watch Later";
 
-  if (!Utils.isVideoUrl(window.location.href)) {
-    Utils.removeElementById("addVideoToWatchlist");
-  }
+    openWatchLaterBtn.addEventListener(
+      "click",
+      WatchLaterPopup.openWatchLaterAsync,
+    );
+
+    if (!buttonSet.has("openWatchLaterBtn")) {
+      addedButton.parentNode.insertBefore(
+        openWatchLaterBtn,
+        addedButton.nextSibling,
+      );
+
+      buttonSet.add("openWatchLaterBtn");
+    }
+
+    if (Utils.isVideoUrl(window.location.href)) {
+      Utils.showButton("addVideoToWatchlist");
+    } else {
+      Utils.hideButton("addVideoToWatchlist");
+    }
+  });
 }
 
 class ArchiveList {
@@ -134,6 +150,16 @@ class Utils {
   static removeElementById(id) {
     const element = document.getElementById(id);
     element.parentNode.removeChild(element);
+  }
+
+  static showButton(id) {
+    const button = document.getElementById(id);
+    button.style.display = "inline-block";
+  }
+
+  static hideButton(id) {
+    const button = document.getElementById(id);
+    button.style.display = "none";
   }
 
   static getIdPortionOfVideoUrl(url) {

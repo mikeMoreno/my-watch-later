@@ -6,6 +6,16 @@ class Utils {
     element.parentNode.removeChild(element);
   }
 
+  static showButton(id) {
+    const button = document.getElementById(id);
+    button.style.display = "inline-block";
+  }
+
+  static hideButton(id) {
+    const button = document.getElementById(id);
+    button.style.display = "none";
+  }
+
   static getIdPortionOfVideoUrl(url) {
     return url.slice(url.indexOf("?v=") + 3);
   }
