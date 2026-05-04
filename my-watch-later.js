@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
-// @version      1.0.1
+// @version      1.1.0
 // @description  A YouTube Watch Later feature that you own
 // @author       Michael Moreno
 // @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
@@ -16,7 +16,7 @@
 
 /* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
-const UserScriptVersion = "1.0.1";
+const UserScriptVersion = "1.1.0";
 /* eslint-enable no-unused-vars */
 
 let buttonSet = new Set();
