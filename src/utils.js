@@ -27,9 +27,17 @@ class Utils {
       return null;
     }
 
-    if (url.includes("&")) {
-      url = url.slice(0, url.indexOf("&"));
+    url = url.slice(0, "watch?");
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const videoId = urlParams.get("v");
+
+    if (videoId == null) {
+      return null;
     }
+
+    url += `watch?v=${videoId}`;
 
     return url;
   }
