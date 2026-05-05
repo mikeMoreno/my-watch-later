@@ -1,3 +1,4 @@
+// Who needs webpack?
 import * as fs from "node:fs";
 
 function getFileContents(file) {
