@@ -16,7 +16,7 @@
 
 /* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
-const UserScriptVersion = "1.1.0";
+const UserScriptVersion = "1.1.2";
 /* eslint-enable no-unused-vars */
 
 let buttonSet = new Set();
