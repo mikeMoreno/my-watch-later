@@ -1,6 +1,6 @@
 {
   "name": "my-watch-later",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A YouTube Watch Later feature that you own",
   "main": "my-watch-later.js",
   "type": "module",
