@@ -35,7 +35,7 @@ class Utils {
   }
 
   static isVideoUrl(url) {
-    if (url == null || !url.includes("watch?v=")) {
+    if (url == null || !url.includes("watch?")) {
       return false;
     }
 
