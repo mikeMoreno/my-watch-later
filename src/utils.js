@@ -27,7 +27,7 @@ class Utils {
       return null;
     }
 
-    url = url.slice(0, "watch?");
+    url = url.slice(0, url.indexOf("watch?"));
 
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
