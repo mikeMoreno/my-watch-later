@@ -3,9 +3,9 @@
 
 # My Watch Later
 
-YouTube's Watch Later feature is nice, but you don't "own" it.
+This is a userscript that lets you create a YouTube Watch Later playlist without having a Google account.
 
-You end up building something that you don't own the data to.
+YouTube's Watch Later feature is nice, but you don't "own" it.
 
 If YouTube decides to remove a video from their site,
 the video gets removed from your Watch Later without your consent.
@@ -21,9 +21,9 @@ That being said, feel free to use and contribute!
 
 ## How it Works
 
-The userscript will place a button to open the watchlist to the right of the YouTube logo.
+The userscript will place a button to open a new Watch Later window to the right of the YouTube logo.
 
-When you click that button, the watchlist opens as a modal dialog in the center of the screen.
+When you click that button, the window opens as a modal dialog in the center of the screen.
 
 <img width="600px" src="https://codeberg.org/michaelmoreno/my-watch-later/raw/branch/master/assets/watchlist_screenshot.png"/>
 

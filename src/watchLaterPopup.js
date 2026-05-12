@@ -49,7 +49,7 @@ class WatchLaterPopup {
     overflow-y: auto;
     background: black; border: 2px solid white; 
     padding: 20px; z-index: 10000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-    <h1 id="my-watchlist-title" style="margin-bottom:10px">My Watchlist (${UserScriptVersion})</h1>
+    <h1 id="my-watchlist-title" style="margin-bottom:10px">My Watch Later (${UserScriptVersion})</h1>
     <div style="margin-bottom:10px">
       <button id="change-sort-direction">Sort: ${sortDirection}</button>
       <button id="export-watchlist">Export</button>

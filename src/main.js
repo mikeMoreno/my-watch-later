@@ -5,7 +5,7 @@ import Utils from "./utils.js";
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
 // @version      1.1.3
-// @description  A YouTube Watch Later feature that you own
+// @description  Create a YouTube Watch Later playlist without a Google account
 // @author       Michael Moreno
 // @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
 // @match        https://www.youtube.com/*
