@@ -322,7 +322,9 @@ class WatchLaterPopup {
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
-      <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
+        <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
+          <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
+        </a>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
         <button id="archive-video-${videoId}">Archive</button>
