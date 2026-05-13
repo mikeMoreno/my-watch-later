@@ -22,32 +22,16 @@ class ArchiveList {
     /* eslint-enable no-undef */
   }
 
-  static async archiveVideoAsync(indexToArchive) {
+  static async archiveVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
     if (watchlist.length === 0) {
       return;
     }
 
-    const videoToArchive = watchlist.find(
-      (v, index) => index === indexToArchive,
-    );
+    const videoToArchive = watchlist.find((v) => v.id === id);
 
-    const newWatchlist = watchlist.filter(
-      (v, index) => index !== indexToArchive,
-    );
-
-    await WatchList.saveWatchlistAsync(newWatchlist);
-
-    Utils.removeElementById(`watchlist-video-${indexToArchive}`);
-
-    const videoCountElement = document.getElementById("videoCount");
-    
-    if (newWatchlist.length === 1) {
-      videoCountElement.innerText = `${newWatchlist.length} video`;
-    } else {
-      videoCountElement.innerText = `${newWatchlist.length} videos`;
-    }
+    await WatchList.removeVideoAsync(id);
 
     const archiveList = await ArchiveList.loadArchiveListAsync();
 
