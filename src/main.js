@@ -4,7 +4,7 @@ import Utils from "./utils.js";
 // ==UserScript==
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
-// @version      1.1.3
+// @version      1.2.0
 // @description  Create a YouTube Watch Later playlist without a Google account
 // @author       Michael Moreno
 // @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
@@ -17,7 +17,7 @@ import Utils from "./utils.js";
 
 /* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
-const UserScriptVersion = "1.1.3";
+const UserScriptVersion = "1.2.0";
 /* eslint-enable no-unused-vars */
 
 let buttonSet = new Set();
