@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Watch Later
 // @namespace    http://www.mikesbytes.net/userscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Create a YouTube Watch Later playlist without a Google account
 // @author       Michael Moreno
 // @homepageURL  https://greasyfork.org/en/scripts/576490-my-watch-later
@@ -16,7 +16,7 @@
 
 /* eslint-disable no-unused-vars */
 const UserScriptName = "My Watch Later";
-const UserScriptVersion = "1.2.0";
+const UserScriptVersion = "1.3.0";
 /* eslint-enable no-unused-vars */
 
 let buttonSet = new Set();
@@ -300,7 +300,7 @@ class WatchLaterPopup {
 
     for (let i = 0; i < watchlist.length; i++) {
       const videoId = watchlist[i].id;
-      const title = watchlist[i].title;
+      const title = watchlist[i].title ?? "Couldn't get title";
       const url = watchlist[i].url;
 
       watchlistVideos.insertAdjacentHTML(
@@ -367,15 +367,19 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
+      await WatchList.moveVideoToTopAsync(url);
+
       alert("We already had that video");
       return;
     }
 
-    const watchlist = await WatchList.loadWatchlistAsync();
-
     const titleElement = document.getElementById("title");
 
-    const title = titleElement.innerText.trim();
+    let title = titleElement.innerText.trim();
+
+    if (title === "") {
+      title = null;
+    }
 
     const ownerElement = document.getElementById("owner");
 
@@ -391,19 +395,26 @@ class WatchList {
       dateAdded: Date.now(),
     };
 
-    const sortDirection = await Utils.getCurrentSortDirectionAsync();
-
-    if (sortDirection === "Ascending") {
-      watchlist.push(newVideo);
-    } else {
-      watchlist.unshift(newVideo);
-    }
-
-    await WatchList.saveWatchlistAsync(watchlist);
+    await WatchList.addVideoToWatchListAsync(newVideo);
 
     alert("Video added");
   }
 
+  static async addVideoToWatchListAsync(video) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
+
+    if (sortDirection === "Ascending") {
+      watchlist.push(video);
+    } else {
+      watchlist.unshift(video);
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
+  }
+
+  // This function assumes the Watch Later Popup is open
   static async removeVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
@@ -426,14 +437,40 @@ class WatchList {
     }
   }
 
-  static async isVideoInWatchlistAsync(url) {
+  // This function is just for removing a video from the watchlist.
+  // TODO: cleanup
+  static async removeVideoFromWatchListAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
-    if (watchlist.some((v) => v.url === url)) {
-      return true;
+    if (watchlist.length === 0) {
+      return;
     }
 
-    return false;
+    const newWatchlist = watchlist.filter((v) => v.id !== id);
+
+    await WatchList.saveWatchlistAsync(newWatchlist);
+  }
+
+  static async getVideoByUrl(url) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const video = watchlist.find((v) => v.url === url);
+
+    return video;
+  }
+
+  static async isVideoInWatchlistAsync(url) {
+    const video = await WatchList.getVideoByUrl(url);
+
+    return video != null;
+  }
+
+  static async moveVideoToTopAsync(url) {
+    const video = await WatchList.getVideoByUrl(url);
+
+    await WatchList.removeVideoFromWatchListAsync(video.id);
+
+    await WatchList.addVideoToWatchListAsync(video);
   }
 
   static async exportWatchlistAsync() {

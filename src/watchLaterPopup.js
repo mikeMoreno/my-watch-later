@@ -106,7 +106,7 @@ class WatchLaterPopup {
 
     for (let i = 0; i < watchlist.length; i++) {
       const videoId = watchlist[i].id;
-      const title = watchlist[i].title;
+      const title = watchlist[i].title ?? "Couldn't get title";
       const url = watchlist[i].url;
 
       watchlistVideos.insertAdjacentHTML(

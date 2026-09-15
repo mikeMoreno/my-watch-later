@@ -37,15 +37,19 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
+      await WatchList.moveVideoToTopAsync(url);
+
       alert("We already had that video");
       return;
     }
 
-    const watchlist = await WatchList.loadWatchlistAsync();
-
     const titleElement = document.getElementById("title");
 
-    const title = titleElement.innerText.trim();
+    let title = titleElement.innerText.trim();
+
+    if (title === "") {
+      title = null;
+    }
 
     const ownerElement = document.getElementById("owner");
 
@@ -61,19 +65,26 @@ class WatchList {
       dateAdded: Date.now(),
     };
 
-    const sortDirection = await Utils.getCurrentSortDirectionAsync();
-
-    if (sortDirection === "Ascending") {
-      watchlist.push(newVideo);
-    } else {
-      watchlist.unshift(newVideo);
-    }
-
-    await WatchList.saveWatchlistAsync(watchlist);
+    await WatchList.addVideoToWatchListAsync(newVideo);
 
     alert("Video added");
   }
 
+  static async addVideoToWatchListAsync(video) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
+
+    if (sortDirection === "Ascending") {
+      watchlist.push(video);
+    } else {
+      watchlist.unshift(video);
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
+  }
+
+  // This function assumes the Watch Later Popup is open
   static async removeVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
@@ -96,14 +107,40 @@ class WatchList {
     }
   }
 
-  static async isVideoInWatchlistAsync(url) {
+  // This function is just for removing a video from the watchlist.
+  // TODO: cleanup
+  static async removeVideoFromWatchListAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
-    if (watchlist.some((v) => v.url === url)) {
-      return true;
+    if (watchlist.length === 0) {
+      return;
     }
 
-    return false;
+    const newWatchlist = watchlist.filter((v) => v.id !== id);
+
+    await WatchList.saveWatchlistAsync(newWatchlist);
+  }
+
+  static async getVideoByUrl(url) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const video = watchlist.find((v) => v.url === url);
+
+    return video;
+  }
+
+  static async isVideoInWatchlistAsync(url) {
+    const video = await WatchList.getVideoByUrl(url);
+
+    return video != null;
+  }
+
+  static async moveVideoToTopAsync(url) {
+    const video = await WatchList.getVideoByUrl(url);
+
+    await WatchList.removeVideoFromWatchListAsync(video.id);
+
+    await WatchList.addVideoToWatchListAsync(video);
   }
 
   static async exportWatchlistAsync() {
