@@ -303,15 +303,18 @@ class WatchLaterPopup {
       const title = watchlist[i].title ?? "Couldn't get title";
       const url = watchlist[i].url;
 
+      const idPortion = Utils.getIdPortionOfVideoUrl(url);
+
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
-          <img src="https://img.youtube.com/vi/${Utils.getIdPortionOfVideoUrl(url)}/default.jpg">
+          <img src="https://img.youtube.com/vi/${idPortion}/default.jpg">
         </a>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
-        <button id="archive-video-${videoId}">Archive</button>
+        <button id="archive-video-${videoId}" style="margin-right:10px">Archive</button>
+        <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
       </li>`,
       );
 
