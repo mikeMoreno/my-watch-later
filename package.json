@@ -8,10 +8,10 @@
   "license": "GPL-3.0",
   "scripts": {
     "build": "node builder.js && npm run format-output",
-    "format": "prettier --write src/**/*.js && prettier --write builder.js && prettier --write my-watch-later.js",
-    "format-output": "prettier --write my-watch-later.js --log-level silent",
-    "lint": "eslint src/**/*.js && eslint builder.js && eslint my-watch-later.js",
-    "lint-fix": "eslint --fix src/**/*.js && eslint --fix builder.js && eslint --fix my-watch-later.js",
+    "format": "prettier --write src/**/*.js && prettier --write builder.js && prettier --write out/my-watch-later.js",
+    "format-output": "prettier --write out/my-watch-later.js --log-level silent",
+    "lint": "eslint src/**/*.js && eslint builder.js && eslint out/my-watch-later.js",
+    "lint-fix": "eslint --fix src/**/*.js && eslint --fix builder.js && eslint --fix out/my-watch-later.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "repository": {

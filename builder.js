@@ -70,4 +70,4 @@ for (const file of files) {
 
 finalOutput += "main();\n";
 
-fs.writeFileSync("my-watch-later.js", finalOutput);
+fs.writeFileSync("out/my-watch-later.js", finalOutput);
