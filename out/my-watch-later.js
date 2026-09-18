@@ -314,6 +314,7 @@ class WatchLaterPopup {
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
         <button id="archive-video-${videoId}" style="margin-right:10px">Archive</button>
+        <button id="move-to-top-video-${videoId}" style="margin-right:10px">Move to Top</button>
         <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
       </li>`,
       );
@@ -328,6 +329,14 @@ class WatchLaterPopup {
         .getElementById(`archive-video-${videoId}`)
         .addEventListener("click", async () => {
           await ArchiveList.archiveVideoAsync(videoId);
+        });
+
+      document
+        .getElementById(`move-to-top-video-${videoId}`)
+        .addEventListener("click", async () => {
+          const video = await WatchList.getVideoById(videoId);
+
+          await WatchList.moveVideoToTopAsync(video);
         });
     }
   }
@@ -370,7 +379,9 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
-      await WatchList.moveVideoToTopAsync(url);
+      const video = await this.getVideoByUrl(url);
+
+      await WatchList.moveVideoToTopAsync(video);
 
       alert("We already had that video");
       return;
@@ -454,6 +465,14 @@ class WatchList {
     await WatchList.saveWatchlistAsync(newWatchlist);
   }
 
+  static async getVideoById(id) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const video = watchlist.find((v) => v.id === id);
+
+    return video;
+  }
+
   static async getVideoByUrl(url) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
@@ -468,9 +487,7 @@ class WatchList {
     return video != null;
   }
 
-  static async moveVideoToTopAsync(url) {
-    const video = await WatchList.getVideoByUrl(url);
-
+  static async moveVideoToTopAsync(video) {
     await WatchList.removeVideoFromWatchListAsync(video.id);
 
     await WatchList.addVideoToWatchListAsync(video);

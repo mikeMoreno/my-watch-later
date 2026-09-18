@@ -120,6 +120,7 @@ class WatchLaterPopup {
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
         <button id="archive-video-${videoId}" style="margin-right:10px">Archive</button>
+        <button id="move-to-top-video-${videoId}" style="margin-right:10px">Move to Top</button>
         <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
       </li>`,
       );
@@ -135,6 +136,15 @@ class WatchLaterPopup {
         .addEventListener("click", async () => {
           await ArchiveList.archiveVideoAsync(videoId);
         });
+
+      document
+        .getElementById(`move-to-top-video-${videoId}`)
+        .addEventListener("click", async () => {
+          
+          const video = await WatchList.getVideoById(videoId);
+          
+          await WatchList.moveVideoToTopAsync(video);
+      });
     }
   }
 }

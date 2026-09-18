@@ -37,7 +37,10 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
-      await WatchList.moveVideoToTopAsync(url);
+
+      const video = await this.getVideoByUrl(url);
+
+      await WatchList.moveVideoToTopAsync(video);
 
       alert("We already had that video");
       return;
@@ -121,6 +124,14 @@ class WatchList {
     await WatchList.saveWatchlistAsync(newWatchlist);
   }
 
+  static async getVideoById(id) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const video = watchlist.find((v) => v.id === id);
+
+    return video;
+  }
+
   static async getVideoByUrl(url) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
@@ -135,9 +146,7 @@ class WatchList {
     return video != null;
   }
 
-  static async moveVideoToTopAsync(url) {
-    const video = await WatchList.getVideoByUrl(url);
-
+  static async moveVideoToTopAsync(video) {
     await WatchList.removeVideoFromWatchListAsync(video.id);
 
     await WatchList.addVideoToWatchListAsync(video);
