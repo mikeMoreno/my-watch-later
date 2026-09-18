@@ -221,6 +221,16 @@ class WatchLaterPopup {
     changeSortBtn.innerText = `Sort: ${nextDirection}`;
   }
 
+  static async moveVideoToTopAsync(videoId) {
+    const video = await WatchList.getVideoById(videoId);
+
+    await WatchList.moveVideoToTopAsync(video);
+
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    WatchLaterPopup.populateListUI(watchlist);
+  }
+
   static async openWatchLaterAsync() {
     const previouslyExistingPopup = document.getElementById("my-watchlist");
 
@@ -334,9 +344,7 @@ class WatchLaterPopup {
       document
         .getElementById(`move-to-top-video-${videoId}`)
         .addEventListener("click", async () => {
-          const video = await WatchList.getVideoById(videoId);
-
-          await WatchList.moveVideoToTopAsync(video);
+          await WatchLaterPopup.moveVideoToTopAsync(videoId);
         });
     }
   }
@@ -453,14 +461,14 @@ class WatchList {
 
   // This function is just for removing a video from the watchlist.
   // TODO: cleanup
-  static async removeVideoFromWatchListAsync(id) {
+  static async removeVideoFromWatchListAsync(video) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
     if (watchlist.length === 0) {
       return;
     }
 
-    const newWatchlist = watchlist.filter((v) => v.id !== id);
+    const newWatchlist = watchlist.filter((v) => v.id !== video.id);
 
     await WatchList.saveWatchlistAsync(newWatchlist);
   }
@@ -488,7 +496,7 @@ class WatchList {
   }
 
   static async moveVideoToTopAsync(video) {
-    await WatchList.removeVideoFromWatchListAsync(video.id);
+    await WatchList.removeVideoFromWatchListAsync(video);
 
     await WatchList.addVideoToWatchListAsync(video);
   }

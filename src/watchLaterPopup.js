@@ -27,6 +27,16 @@ class WatchLaterPopup {
     changeSortBtn.innerText = `Sort: ${nextDirection}`;
   }
 
+  static async moveVideoToTopAsync(videoId) {
+    const video = await WatchList.getVideoById(videoId);
+
+    await WatchList.moveVideoToTopAsync(video);
+
+    const watchlist = await WatchList.loadWatchlistAsync();
+ 
+    WatchLaterPopup.populateListUI(watchlist);
+  }
+
   static async openWatchLaterAsync() {
     const previouslyExistingPopup = document.getElementById("my-watchlist");
 
@@ -140,10 +150,7 @@ class WatchLaterPopup {
       document
         .getElementById(`move-to-top-video-${videoId}`)
         .addEventListener("click", async () => {
-          
-          const video = await WatchList.getVideoById(videoId);
-          
-          await WatchList.moveVideoToTopAsync(video);
+          await WatchLaterPopup.moveVideoToTopAsync(videoId);
       });
     }
   }
