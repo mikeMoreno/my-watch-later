@@ -387,7 +387,7 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
-      const video = await this.getVideoByUrl(url);
+      const video = await WatchList.getVideoByUrl(url);
 
       await WatchList.moveVideoToTopAsync(video);
 
