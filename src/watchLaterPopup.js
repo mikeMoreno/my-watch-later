@@ -33,7 +33,7 @@ class WatchLaterPopup {
     await WatchList.moveVideoToTopAsync(video);
 
     const watchlist = await WatchList.loadWatchlistAsync();
- 
+
     WatchLaterPopup.populateListUI(watchlist);
   }
 
@@ -106,7 +106,12 @@ class WatchLaterPopup {
       videoCountElement.innerText = `${watchlist.length} videos`;
     }
 
-    WatchLaterPopup.populateListUI(watchlist);
+    // TODO: Remove this code to cache thumbnails of existing videos at a later date.
+    await WatchLaterPopup.cacheThumbnailsOfExistingVideosAsync(watchlist);
+
+    const reloadedWatchlist = await WatchList.loadWatchlistAsync();
+
+    WatchLaterPopup.populateListUI(reloadedWatchlist);
   }
 
   static populateListUI(watchlist) {
@@ -115,17 +120,30 @@ class WatchLaterPopup {
     watchlistVideos.innerHTML = "";
 
     for (let i = 0; i < watchlist.length; i++) {
-      const videoId = watchlist[i].id;
-      const title = watchlist[i].title ?? "Couldn't get title";
-      const url = watchlist[i].url;
+      const video = watchlist[i];
+
+      const videoId = video.id;
+      const title = video.title ?? "Couldn't get title";
+      const url = video.url;
+      const thumbnail = video.thumbnail;
 
       const idPortion = Utils.getIdPortionOfVideoUrl(url);
+
+      let imgTagHtml;
+
+      if (thumbnail) {
+        imgTagHtml = `<img src="${thumbnail}">`;
+      } else {
+        imgTagHtml = `<img src="https://img.youtube.com/vi/${idPortion}/default.jpg">`;
+
+        console.warn(`VideoId: ${videoId}, Url: ${url}, retrieving thumbnail from YouTube`);
+      }
 
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
-          <img src="https://img.youtube.com/vi/${idPortion}/default.jpg">
+          ${imgTagHtml}
         </a>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
@@ -151,8 +169,24 @@ class WatchLaterPopup {
         .getElementById(`move-to-top-video-${videoId}`)
         .addEventListener("click", async () => {
           await WatchLaterPopup.moveVideoToTopAsync(videoId);
-      });
+        });
     }
+  }
+
+  static async cacheThumbnailsOfExistingVideosAsync(watchlist) {
+    for (let i = 0; i < watchlist.length; i++) {
+      const video = watchlist[i];
+
+      if (video.thumbnail == null) {
+        const url = video.url;
+
+        const thumbnail = await WatchList.downloadThumbnailAsync(url);
+
+        video.thumbnail = thumbnail;
+      }
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
   }
 }
 
