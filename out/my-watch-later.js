@@ -309,17 +309,32 @@ class WatchLaterPopup {
     watchlistVideos.innerHTML = "";
 
     for (let i = 0; i < watchlist.length; i++) {
-      const videoId = watchlist[i].id;
-      const title = watchlist[i].title ?? "Couldn't get title";
-      const url = watchlist[i].url;
+      const video = watchlist[i];
+
+      const videoId = video.id;
+      const title = video.title ?? "Couldn't get title";
+      const url = video.url;
+      const thumbnail = video.thumbnail;
 
       const idPortion = Utils.getIdPortionOfVideoUrl(url);
+
+      let imgTagHtml;
+
+      if (thumbnail) {
+        imgTagHtml = `<img src="${thumbnail}">`;
+      } else {
+        imgTagHtml = `<img src="https://img.youtube.com/vi/${idPortion}/default.jpg">`;
+
+        console.warn(
+          `VideoId: ${videoId}, Url: ${url}, retrieving thumbnail from YouTube`,
+        );
+      }
 
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
-          <img src="https://img.youtube.com/vi/${idPortion}/default.jpg">
+          ${imgTagHtml}
         </a>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
         <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
@@ -409,12 +424,15 @@ class WatchList {
       .slice(0, ownerElement.innerText.indexOf("\n"))
       .trim();
 
+    const thumbnail = await WatchList.downloadThumbnailAsync(url);
+
     const newVideo = {
       id: crypto.randomUUID(),
       title,
       url,
       channel,
       dateAdded: Date.now(),
+      thumbnail,
     };
 
     await WatchList.addVideoToWatchListAsync(newVideo);
@@ -501,6 +519,28 @@ class WatchList {
     video.dateAdded = Date.now();
 
     await WatchList.addVideoToWatchListAsync(video);
+  }
+
+  static convertBlobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  static async downloadThumbnailAsync(url) {
+    const idPortion = Utils.getIdPortionOfVideoUrl(url);
+
+    const response = await fetch(
+      `https://img.youtube.com/vi/${idPortion}/default.jpg`,
+    );
+    const blob = await response.blob();
+
+    const base64String = await WatchList.convertBlobToBase64(blob);
+
+    return base64String;
   }
 
   static async exportWatchlistAsync() {

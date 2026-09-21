@@ -60,12 +60,15 @@ class WatchList {
       .slice(0, ownerElement.innerText.indexOf("\n"))
       .trim();
 
+    const thumbnail = await WatchList.downloadThumbnailAsync(url);
+
     const newVideo = {
       id: crypto.randomUUID(),
       title,
       url,
       channel,
       dateAdded: Date.now(),
+      thumbnail,
     };
 
     await WatchList.addVideoToWatchListAsync(newVideo);
@@ -152,6 +155,26 @@ class WatchList {
     video.dateAdded = Date.now();
 
     await WatchList.addVideoToWatchListAsync(video);
+  }
+
+  static convertBlobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  static async downloadThumbnailAsync(url) {
+    const idPortion = Utils.getIdPortionOfVideoUrl(url);
+
+    const response = await fetch(`https://img.youtube.com/vi/${idPortion}/default.jpg`);
+    const blob = await response.blob();
+
+    const base64String = await WatchList.convertBlobToBase64(blob);
+
+    return base64String;
   }
 
   static async exportWatchlistAsync() {
