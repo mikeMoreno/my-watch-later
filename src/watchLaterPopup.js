@@ -106,7 +106,12 @@ class WatchLaterPopup {
       videoCountElement.innerText = `${watchlist.length} videos`;
     }
 
-    WatchLaterPopup.populateListUI(watchlist);
+    // TODO: Remove this code to cache thumbnails of existing videos at a later date.
+    await WatchLaterPopup.cacheThumbnailsOfExistingVideosAsync(watchlist);
+
+    const reloadedWatchlist = await WatchList.loadWatchlistAsync();
+
+    WatchLaterPopup.populateListUI(reloadedWatchlist);
   }
 
   static populateListUI(watchlist) {
@@ -121,7 +126,7 @@ class WatchLaterPopup {
       const title = video.title ?? "Couldn't get title";
       const url = video.url;
       const thumbnail = video.thumbnail;
-      
+
       const idPortion = Utils.getIdPortionOfVideoUrl(url);
 
       let imgTagHtml;
@@ -166,6 +171,22 @@ class WatchLaterPopup {
           await WatchLaterPopup.moveVideoToTopAsync(videoId);
         });
     }
+  }
+
+  static async cacheThumbnailsOfExistingVideosAsync(watchlist) {
+    for (let i = 0; i < watchlist.length; i++) {
+      const video = watchlist[i];
+
+      if (video.thumbnail == null) {
+        const url = video.url;
+
+        const thumbnail = await WatchList.downloadThumbnailAsync(url);
+
+        video.thumbnail = thumbnail;
+      }
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
   }
 }
 
