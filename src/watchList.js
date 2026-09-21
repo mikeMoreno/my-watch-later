@@ -42,7 +42,7 @@ class WatchList {
 
       await WatchList.moveVideoToTopAsync(video);
 
-      alert("We already had that video");
+      alert("We already had that video. Moving it to top.");
       return;
     }
 
@@ -148,6 +148,8 @@ class WatchList {
 
   static async moveVideoToTopAsync(video) {
     await WatchList.removeVideoFromWatchListAsync(video);
+
+    video.dateAdded = Date.now();
 
     await WatchList.addVideoToWatchListAsync(video);
   }
