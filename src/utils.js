@@ -6,6 +6,20 @@ class Utils {
     element.parentNode.removeChild(element);
   }
 
+  static swapVideos(elementAId, elementBId) {
+    const elementA = document.getElementById(elementAId);
+    const elementB = document.getElementById(elementBId);
+
+    const temp = document.createTextNode("");
+    elementA.before(temp);
+
+    elementB.before(elementA);
+
+    temp.after(elementB);
+
+    temp.remove();
+  }
+
   static showButton(id) {
     const button = document.getElementById(id);
     button.style.display = "inline-block";

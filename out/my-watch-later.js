@@ -136,6 +136,20 @@ class Utils {
     element.parentNode.removeChild(element);
   }
 
+  static swapVideos(elementAId, elementBId) {
+    const elementA = document.getElementById(elementAId);
+    const elementB = document.getElementById(elementBId);
+
+    const temp = document.createTextNode("");
+    elementA.before(temp);
+
+    elementB.before(elementA);
+
+    temp.after(elementB);
+
+    temp.remove();
+  }
+
   static showButton(id) {
     const button = document.getElementById(id);
     button.style.display = "inline-block";
@@ -245,9 +259,9 @@ class WatchLaterPopup {
     /* eslint-disable no-undef */
     const watchlistPopup = `
 <div id="my-watchlist" style="
-    position: fixed; top: 50%; left: 50%; 
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 700px;
+    width:800px;
     color: white;
     height:300px;
     overflow-y: auto;
@@ -338,6 +352,8 @@ class WatchLaterPopup {
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
+        <button id="move-video-up-${videoId}" style="margin-right:10px">^</button>
+        <button id="move-video-down-${videoId}" style="margin-right:10px">v</button>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
           ${imgTagHtml}
         </a>
@@ -348,6 +364,22 @@ class WatchLaterPopup {
         <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
       </li>`,
       );
+
+      const btnMoveVideoUp = document.getElementById(
+        `move-video-up-${videoId}`,
+      );
+
+      btnMoveVideoUp.addEventListener("click", async () => {
+        await WatchList.moveVideoUpAsync(videoId);
+      });
+
+      const btnMoveVideoDown = document.getElementById(
+        `move-video-down-${videoId}`,
+      );
+
+      btnMoveVideoDown.addEventListener("click", async () => {
+        await WatchList.moveVideoDownAsync(videoId);
+      });
 
       document
         .getElementById(`remove-video-${videoId}`)
@@ -473,6 +505,76 @@ class WatchList {
     }
 
     await WatchList.saveWatchlistAsync(watchlist);
+  }
+
+  static async addVideoToWatchListAtIndexAsync(index, video) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    watchlist.splice(index, 0, video);
+
+    await WatchList.saveWatchlistAsync(watchlist);
+  }
+
+  // TODO: separate placement for these functions that assume the Watch Later Popup is open? need to refactor
+
+  // This function assumes the Watch Later Popup is open
+  static async moveVideoUpAsync(videoId) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const videoIndex = watchlist.findIndex((v) => v.id === videoId);
+
+    if (videoIndex === -1) {
+      console.error(`Couldn't find the video with id ${videoId}.`);
+      return;
+    }
+
+    if (videoIndex === 0) {
+      console.info(`Video is already at the top.`);
+      return;
+    }
+
+    const videoAbove = watchlist[videoIndex - 1];
+    const videoToMove = watchlist[videoIndex];
+
+    watchlist[videoIndex] = videoAbove;
+    watchlist[videoIndex - 1] = videoToMove;
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    Utils.swapVideos(
+      `watchlist-video-${videoAbove.id}`,
+      `watchlist-video-${videoToMove.id}`,
+    );
+  }
+
+  // This function assumes the Watch Later Popup is open
+  static async moveVideoDownAsync(videoId) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const videoIndex = watchlist.findIndex((v) => v.id === videoId);
+
+    if (videoIndex === -1) {
+      console.error(`Couldn't find the video with id ${videoId}.`);
+      return;
+    }
+
+    if (videoIndex === watchlist.length - 1) {
+      console.info(`Video is already at the bottom.`);
+      return;
+    }
+
+    const videoToMove = watchlist[videoIndex];
+    const videoBelow = watchlist[videoIndex + 1];
+
+    watchlist[videoIndex] = videoBelow;
+    watchlist[videoIndex + 1] = videoToMove;
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    Utils.swapVideos(
+      `watchlist-video-${videoToMove.id}`,
+      `watchlist-video-${videoBelow.id}`,
+    );
   }
 
   // This function assumes the Watch Later Popup is open

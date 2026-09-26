@@ -90,6 +90,70 @@ class WatchList {
     await WatchList.saveWatchlistAsync(watchlist);
   }
 
+  static async addVideoToWatchListAtIndexAsync(index, video) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    watchlist.splice(index, 0, video);
+
+    await WatchList.saveWatchlistAsync(watchlist);
+  }
+
+  // TODO: separate placement for these functions that assume the Watch Later Popup is open? need to refactor
+
+  // This function assumes the Watch Later Popup is open
+  static async moveVideoUpAsync(videoId) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const videoIndex = watchlist.findIndex(v => v.id === videoId);
+
+    if (videoIndex === -1) {
+      console.error(`Couldn't find the video with id ${videoId}.`);
+      return;
+    }
+
+    if (videoIndex === 0) {
+      console.info(`Video is already at the top.`);
+      return;
+    }
+
+    const videoAbove = watchlist[videoIndex - 1];
+    const videoToMove = watchlist[videoIndex];
+
+    watchlist[videoIndex] = videoAbove;
+    watchlist[videoIndex - 1] = videoToMove;
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    Utils.swapVideos(`watchlist-video-${videoAbove.id}`, `watchlist-video-${videoToMove.id}`);
+  }
+
+  // This function assumes the Watch Later Popup is open
+  static async moveVideoDownAsync(videoId) {
+    const watchlist = await WatchList.loadWatchlistAsync();
+
+    const videoIndex = watchlist.findIndex(v => v.id === videoId);
+
+    if (videoIndex === -1) {
+      console.error(`Couldn't find the video with id ${videoId}.`);
+      return;
+    }
+
+    if (videoIndex === watchlist.length - 1) {
+      console.info(`Video is already at the bottom.`);
+      return;
+    }
+
+    const videoToMove = watchlist[videoIndex];
+    const videoBelow = watchlist[videoIndex + 1];
+
+    watchlist[videoIndex] = videoBelow;
+    watchlist[videoIndex + 1] = videoToMove;
+
+    await WatchList.saveWatchlistAsync(watchlist);
+
+    Utils.swapVideos(`watchlist-video-${videoToMove.id}`, `watchlist-video-${videoBelow.id}`);
+  }
+
   // This function assumes the Watch Later Popup is open
   static async removeVideoAsync(id) {
     const watchlist = await WatchList.loadWatchlistAsync();

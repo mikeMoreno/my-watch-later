@@ -51,9 +51,9 @@ class WatchLaterPopup {
     /* eslint-disable no-undef */
     const watchlistPopup = `
 <div id="my-watchlist" style="
-    position: fixed; top: 50%; left: 50%; 
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 700px;
+    width:800px;
     color: white;
     height:300px;
     overflow-y: auto;
@@ -142,6 +142,8 @@ class WatchLaterPopup {
       watchlistVideos.insertAdjacentHTML(
         "beforeend",
         `<li id="watchlist-video-${videoId}" style="margin-top:10px;display: flex;align-items:center">
+        <button id="move-video-up-${videoId}" style="margin-right:10px">^</button>
+        <button id="move-video-down-${videoId}" style="margin-right:10px">v</button>
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
           ${imgTagHtml}
         </a>
@@ -152,6 +154,18 @@ class WatchLaterPopup {
         <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
       </li>`,
       );
+
+      const btnMoveVideoUp = document.getElementById(`move-video-up-${videoId}`);
+
+      btnMoveVideoUp.addEventListener("click", async () => {
+        await WatchList.moveVideoUpAsync(videoId);
+      });
+
+      const btnMoveVideoDown = document.getElementById(`move-video-down-${videoId}`);
+
+      btnMoveVideoDown.addEventListener("click", async () => {
+        await WatchList.moveVideoDownAsync(videoId);
+      });
 
       document
         .getElementById(`remove-video-${videoId}`)
