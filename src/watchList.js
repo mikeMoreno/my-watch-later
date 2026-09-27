@@ -125,6 +125,21 @@ class WatchList {
     await WatchList.saveWatchlistAsync(watchlist);
 
     Utils.swapVideos(`watchlist-video-${videoAbove.id}`, `watchlist-video-${videoToMove.id}`);
+
+    if (videoIndex - 1 === 0) {
+      let btnMoveVideoUp = document.getElementById(`move-video-up-${videoToMove.id}`);
+      btnMoveVideoUp.disabled = true;
+
+      btnMoveVideoUp = document.getElementById(`move-video-up-${videoAbove.id}`);
+      btnMoveVideoUp.disabled = false;
+    }
+    else if (videoIndex === watchlist.length - 1) {
+      let btnMoveVideoDown = document.getElementById(`move-video-down-${videoToMove.id}`);
+      btnMoveVideoDown.disabled = false;
+
+      btnMoveVideoDown = document.getElementById(`move-video-down-${videoAbove.id}`);
+      btnMoveVideoDown.disabled = true;
+    }
   }
 
   // This function assumes the Watch Later Popup is open
@@ -152,6 +167,21 @@ class WatchList {
     await WatchList.saveWatchlistAsync(watchlist);
 
     Utils.swapVideos(`watchlist-video-${videoToMove.id}`, `watchlist-video-${videoBelow.id}`);
+
+    if (videoIndex + 1 === watchlist.length - 1) {
+      let btnMoveVideoDown = document.getElementById(`move-video-down-${videoToMove.id}`);
+      btnMoveVideoDown.disabled = true;
+
+      btnMoveVideoDown = document.getElementById(`move-video-down-${videoBelow.id}`);
+      btnMoveVideoDown.disabled = false;
+    }
+    else if (videoIndex === 0) {
+      let btnMoveVideoUp = document.getElementById(`move-video-up-${videoToMove.id}`);
+      btnMoveVideoUp.disabled = false;
+
+      btnMoveVideoUp = document.getElementById(`move-video-up-${videoBelow.id}`);
+      btnMoveVideoUp.disabled = true;
+    }
   }
 
   // This function assumes the Watch Later Popup is open
