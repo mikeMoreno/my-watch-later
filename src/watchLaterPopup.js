@@ -161,11 +161,20 @@ class WatchLaterPopup {
         await WatchList.moveVideoUpAsync(videoId);
       });
 
+      if (i === 0) {
+        btnMoveVideoUp.disabled = true;
+      }
+
       const btnMoveVideoDown = document.getElementById(`move-video-down-${videoId}`);
 
       btnMoveVideoDown.addEventListener("click", async () => {
         await WatchList.moveVideoDownAsync(videoId);
       });
+
+      if (i === watchlist.length - 1) {
+        btnMoveVideoDown.disabled = true;
+      }
+
 
       document
         .getElementById(`remove-video-${videoId}`)
