@@ -217,9 +217,9 @@ class WatchLaterPopup {
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     if (sortDirection === "Ascending") {
-      watchlist.sort((videoA, videoB) => videoB.dateAdded - videoA.dateAdded);
+      watchlist.sort((videoA, videoB) => videoB.ordinal - videoA.ordinal);
     } else {
-      watchlist.sort((videoA, videoB) => videoA.dateAdded - videoB.dateAdded);
+      watchlist.sort((videoA, videoB) => videoA.ordinal - videoB.ordinal);
     }
 
     const nextDirection =
@@ -314,8 +314,11 @@ class WatchLaterPopup {
       videoCountElement.innerText = `${watchlist.length} videos`;
     }
 
-    // TODO: Remove this code to cache thumbnails of existing videos at a later date.
+    // TODO: Remove this code at a later date.
     await WatchLaterPopup.cacheThumbnailsOfExistingVideosAsync(watchlist);
+
+    // TODO: Remove this code at a later date.
+    await WatchList.setOrdinalsOfLegacyVideosAsync(watchlist);
 
     const reloadedWatchlist = await WatchList.loadWatchlistAsync();
 
@@ -454,6 +457,66 @@ class WatchList {
     /* eslint-enable no-undef */
   }
 
+  static async setOrdinalsOfVideosAsync(watchlist, sortDirection) {
+    if (sortDirection === "Ascending") {
+      let ordinal = 0;
+
+      for (let i = 0; i < watchlist.length; i++) {
+        const video = watchlist[i];
+
+        video.ordinal = ordinal;
+
+        ordinal++;
+      }
+    } else {
+      let ordinal = watchlist.length - 1;
+
+      for (let i = 0; i < watchlist.length; i++) {
+        const video = watchlist[i];
+
+        video.ordinal = ordinal;
+
+        ordinal--;
+      }
+    }
+  }
+
+  static async setOrdinalsOfLegacyVideosAsync(watchlist) {
+    const missingOrdinals = watchlist.some((v) => v.ordinal == null);
+
+    if (!missingOrdinals) {
+      return;
+    }
+
+    console.warn("Some videos missing ordinals");
+
+    const sortDirection = await Utils.getCurrentSortDirectionAsync();
+
+    if (sortDirection === "Ascending") {
+      let ordinal = 0;
+
+      for (let i = 0; i < watchlist.length; i++) {
+        const video = watchlist[i];
+
+        video.ordinal = ordinal;
+
+        ordinal++;
+      }
+    } else {
+      let ordinal = watchlist.length - 1;
+
+      for (let i = 0; i < watchlist.length; i++) {
+        const video = watchlist[i];
+
+        video.ordinal = ordinal;
+
+        ordinal--;
+      }
+    }
+
+    await WatchList.saveWatchlistAsync(watchlist);
+  }
+
   static async addToWatchlistAsync() {
     const url = Utils.getCurrentVideoUrl();
 
@@ -494,6 +557,7 @@ class WatchList {
       channel,
       dateAdded: Date.now(),
       thumbnail,
+      ordinal: null,
     };
 
     await WatchList.addVideoToWatchListAsync(newVideo);
@@ -501,16 +565,18 @@ class WatchList {
     alert("Video added");
   }
 
-  static async addVideoToWatchListAsync(video) {
+  static async addVideoToWatchListAsync(video, moveToTop = false) {
     const watchlist = await WatchList.loadWatchlistAsync();
 
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
-    if (sortDirection === "Ascending") {
-      watchlist.push(video);
-    } else {
+    if (moveToTop || sortDirection === "Descending") {
       watchlist.unshift(video);
+    } else {
+      watchlist.push(video);
     }
+
+    await WatchList.setOrdinalsOfVideosAsync(watchlist, sortDirection);
 
     await WatchList.saveWatchlistAsync(watchlist);
   }
@@ -543,6 +609,10 @@ class WatchList {
 
     const videoAbove = watchlist[videoIndex - 1];
     const videoToMove = watchlist[videoIndex];
+
+    const tempOrdinal = videoToMove.ordinal;
+    videoToMove.ordinal = videoAbove.ordinal;
+    videoAbove.ordinal = tempOrdinal;
 
     watchlist[videoIndex] = videoAbove;
     watchlist[videoIndex - 1] = videoToMove;
@@ -595,6 +665,10 @@ class WatchList {
 
     const videoToMove = watchlist[videoIndex];
     const videoBelow = watchlist[videoIndex + 1];
+
+    const tempOrdinal = videoToMove.ordinal;
+    videoToMove.ordinal = videoBelow.ordinal;
+    videoBelow.ordinal = tempOrdinal;
 
     watchlist[videoIndex] = videoBelow;
     watchlist[videoIndex + 1] = videoToMove;
@@ -691,9 +765,7 @@ class WatchList {
   static async moveVideoToTopAsync(video) {
     await WatchList.removeVideoFromWatchListAsync(video);
 
-    video.dateAdded = Date.now();
-
-    await WatchList.addVideoToWatchListAsync(video);
+    await WatchList.addVideoToWatchListAsync(video, true);
   }
 
   static convertBlobToBase64(blob) {

@@ -9,9 +9,9 @@ class WatchLaterPopup {
     const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
     if (sortDirection === "Ascending") {
-      watchlist.sort((videoA, videoB) => videoB.dateAdded - videoA.dateAdded);
+      watchlist.sort((videoA, videoB) => videoB.ordinal - videoA.ordinal);
     } else {
-      watchlist.sort((videoA, videoB) => videoA.dateAdded - videoB.dateAdded);
+      watchlist.sort((videoA, videoB) => videoA.ordinal - videoB.ordinal);
     }
 
     const nextDirection =
@@ -106,8 +106,11 @@ class WatchLaterPopup {
       videoCountElement.innerText = `${watchlist.length} videos`;
     }
 
-    // TODO: Remove this code to cache thumbnails of existing videos at a later date.
+    // TODO: Remove this code at a later date.
     await WatchLaterPopup.cacheThumbnailsOfExistingVideosAsync(watchlist);
+
+    // TODO: Remove this code at a later date.
+    await WatchList.setOrdinalsOfLegacyVideosAsync(watchlist);
 
     const reloadedWatchlist = await WatchList.loadWatchlistAsync();
 
@@ -174,7 +177,6 @@ class WatchLaterPopup {
       if (i === watchlist.length - 1) {
         btnMoveVideoDown.disabled = true;
       }
-
 
       document
         .getElementById(`remove-video-${videoId}`)
