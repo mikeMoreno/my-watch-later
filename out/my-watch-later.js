@@ -528,9 +528,18 @@ class WatchList {
     if (await WatchList.isVideoInWatchlistAsync(url)) {
       const video = await WatchList.getVideoByUrl(url);
 
-      await WatchList.moveVideoToTopAsync(video);
+      const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
-      alert("We already had that video. Moving it to top.");
+      if (sortDirection === "Descending") {
+        await WatchList.moveVideoToTopAsync(video);
+
+        alert("We already had that video. Moving it to top.");
+      } else {
+        alert("We already had that video.");
+      }
+
+      // TODO: one day support moving a video to the bottom if sortDirection === asc and we already had video.
+
       return;
     }
 
