@@ -9,6 +9,7 @@
 // @match        https://www.youtube.com/watch*
 // @grant        GM.getValue
 // @grant        GM.setValue
+// @require      https://cdn.jsdelivr.net/npm/toastify-js
 // @license      GPL-3.0
 // ==/UserScript==
 
@@ -24,6 +25,8 @@ let buttonSet = new Set();
 // eslint-disable-next-line no-unused-vars
 async function main() {
   document.addEventListener("yt-navigate-finish", () => {
+    addCssForToastify(document);
+
     const addToWatchlistBtn = document.createElement("button");
 
     addToWatchlistBtn.innerText = "Add to My Watch Later";
@@ -68,6 +71,16 @@ async function main() {
       Utils.hideButton("addVideoToWatchlist");
     }
   });
+}
+
+function addCssForToastify(document) {
+  const cssLink = document.createElement("link");
+  cssLink.rel = "stylesheet";
+  cssLink.type = "text/css";
+  cssLink.href =
+    "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css";
+
+  document.head.appendChild(cssLink);
 }
 
 class ArchiveList {
@@ -521,7 +534,7 @@ class WatchList {
     const url = Utils.getCurrentVideoUrl();
 
     if (url == null) {
-      alert("This doesn't look like a video");
+      WatchList.showNotAVideoMessage();
       return;
     }
 
@@ -532,10 +545,11 @@ class WatchList {
 
       if (sortDirection === "Descending") {
         await WatchList.moveVideoToTopAsync(video);
-
-        alert("We already had that video. Moving it to top.");
+        WatchList.showVideoAlreadyAddedMessage(
+          "We already had that video. Moving it to top.",
+        );
       } else {
-        alert("We already had that video.");
+        WatchList.showVideoAlreadyAddedMessage("We already had that video.");
       }
 
       // TODO: one day support moving a video to the bottom if sortDirection === asc and we already had video.
@@ -571,7 +585,7 @@ class WatchList {
 
     await WatchList.addVideoToWatchListAsync(newVideo);
 
-    alert("Video added");
+    WatchList.showVideoAddedMessage();
   }
 
   static async addVideoToWatchListAsync(video, moveToTop = false) {
@@ -823,6 +837,54 @@ class WatchList {
 
     URL.revokeObjectURL(link.href);
     /* eslint-enable n/no-unsupported-features/node-builtins */
+  }
+
+  static showVideoAddedMessage() {
+    Toastify({
+      text: "Video added.",
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #00b09b, #96c93d)",
+      },
+    }).showToast();
+  }
+
+  static showVideoAlreadyAddedMessage(message) {
+    Toastify({
+      text: message,
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #f2994a, #f2c94c)",
+      },
+    }).showToast();
+  }
+
+  static showNotAVideoMessage() {
+    Toastify({
+      text: "This doesn't look like a video",
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+      },
+    }).showToast();
   }
 }
 

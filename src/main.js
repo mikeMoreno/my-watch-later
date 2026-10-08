@@ -12,6 +12,7 @@ import Utils from "./utils.js";
 // @match        https://www.youtube.com/watch*
 // @grant        GM.getValue
 // @grant        GM.setValue
+// @require      https://cdn.jsdelivr.net/npm/toastify-js
 // @license      GPL-3.0
 // ==/UserScript==
 
@@ -25,6 +26,9 @@ let buttonSet = new Set();
 // eslint-disable-next-line no-unused-vars
 async function main() {
   document.addEventListener("yt-navigate-finish", () => {
+
+    addCssForToastify(document);
+
     const addToWatchlistBtn = document.createElement("button");
 
     addToWatchlistBtn.innerText = "Add to My Watch Later";
@@ -69,4 +73,13 @@ async function main() {
       Utils.hideButton("addVideoToWatchlist");
     }
   });
+}
+
+function addCssForToastify(document) {
+  const cssLink = document.createElement('link');
+  cssLink.rel = 'stylesheet';
+  cssLink.type = 'text/css';
+  cssLink.href = 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css';
+  
+  document.head.appendChild(cssLink);
 }

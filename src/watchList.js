@@ -92,7 +92,7 @@ class WatchList {
     const url = Utils.getCurrentVideoUrl();
 
     if (url == null) {
-      alert("This doesn't look like a video");
+      WatchList.showNotAVideoMessage();
       return;
     }
 
@@ -104,10 +104,10 @@ class WatchList {
 
       if (sortDirection === "Descending") {
         await WatchList.moveVideoToTopAsync(video);
+        WatchList.showVideoAlreadyAddedMessage("We already had that video. Moving it to top.");
 
-        alert("We already had that video. Moving it to top.");
       } else {
-        alert("We already had that video.");
+        WatchList.showVideoAlreadyAddedMessage("We already had that video.");
       }
 
       // TODO: one day support moving a video to the bottom if sortDirection === asc and we already had video.
@@ -143,7 +143,7 @@ class WatchList {
 
     await WatchList.addVideoToWatchListAsync(newVideo);
 
-    alert("Video added");
+    WatchList.showVideoAddedMessage();
   }
 
   static async addVideoToWatchListAsync(video, moveToTop = false) {
@@ -374,6 +374,54 @@ class WatchList {
 
     URL.revokeObjectURL(link.href);
     /* eslint-enable n/no-unsupported-features/node-builtins */
+  }
+
+  static showVideoAddedMessage() {
+    Toastify({
+      text: "Video added.",
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #00b09b, #96c93d)",
+      },
+    }).showToast();
+  }
+
+  static showVideoAlreadyAddedMessage(message) {
+    Toastify({
+      text: message,
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #f2994a, #f2c94c)",
+      },
+    }).showToast();
+  }
+
+    static showNotAVideoMessage() {
+    Toastify({
+      text: "This doesn't look like a video",
+      duration: 3000,
+      destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "center",
+      stopOnFocus: true,
+      style: {
+        background: "linear-gradient(to right, #ff5f6d, #ffc371)", 
+      },
+    }).showToast();
   }
 }
 
