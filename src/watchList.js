@@ -92,7 +92,7 @@ class WatchList {
     const url = Utils.getCurrentVideoUrl();
 
     if (url == null) {
-      WatchList.showNotAVideoMessage();
+      WatchList.showErrorMessage("This doesn't look like a video.");
       return;
     }
 
@@ -104,10 +104,10 @@ class WatchList {
 
       if (sortDirection === "Descending") {
         await WatchList.moveVideoToTopAsync(video);
-        WatchList.showVideoAlreadyAddedMessage("We already had that video. Moving it to top.");
+        WatchList.showWarningMessage("We already had that video. Moving it to top.");
 
       } else {
-        WatchList.showVideoAlreadyAddedMessage("We already had that video.");
+        WatchList.showWarningMessage("We already had that video.");
       }
 
       // TODO: one day support moving a video to the bottom if sortDirection === asc and we already had video.
@@ -143,7 +143,11 @@ class WatchList {
 
     await WatchList.addVideoToWatchListAsync(newVideo);
 
-    WatchList.showVideoAddedMessage();
+    if (await WatchList.isVideoInWatchlistAsync(url)) {
+      WatchList.showInfoMessage("Video added.");
+    } else {
+      WatchList.showErrorMessage("Failed to add video. Try again.");
+    }
   }
 
   static async addVideoToWatchListAsync(video, moveToTop = false) {
@@ -376,9 +380,9 @@ class WatchList {
     /* eslint-enable n/no-unsupported-features/node-builtins */
   }
 
-  static showVideoAddedMessage() {
+  static showInfoMessage(message) {
     Toastify({
-      text: "Video added.",
+      text: message,
       duration: 3000,
       destination: "https://github.com/apvarun/toastify-js",
       newWindow: true,
@@ -392,7 +396,7 @@ class WatchList {
     }).showToast();
   }
 
-  static showVideoAlreadyAddedMessage(message) {
+  static showWarningMessage(message) {
     Toastify({
       text: message,
       duration: 3000,
@@ -408,9 +412,9 @@ class WatchList {
     }).showToast();
   }
 
-    static showNotAVideoMessage() {
+  static showErrorMessage(message) {
     Toastify({
-      text: "This doesn't look like a video",
+      text: message,
       duration: 3000,
       destination: "https://github.com/apvarun/toastify-js",
       newWindow: true,
@@ -419,7 +423,7 @@ class WatchList {
       position: "center",
       stopOnFocus: true,
       style: {
-        background: "linear-gradient(to right, #ff5f6d, #ffc371)", 
+        background: "linear-gradient(to right, #ff5f6d, #ffc371)",
       },
     }).showToast();
   }
