@@ -97,15 +97,15 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
-
-      const video = await WatchList.getVideoByUrl(url);
-
       const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
       if (sortDirection === "Descending") {
-        await WatchList.moveVideoToTopAsync(video);
-        WatchList.showWarningMessage("We already had that video. Moving it to top.");
+        const video = await WatchList.getVideoByUrl(url);
 
+        const refreshedVideo = WatchList.refreshVideo(document, video);
+
+        await WatchList.moveVideoToTopAsync(refreshedVideo);
+        WatchList.showWarningMessage("We already had that video. Moving it to top.");
       } else {
         WatchList.showWarningMessage("We already had that video.");
       }
@@ -115,20 +115,9 @@ class WatchList {
       return;
     }
 
-    const titleElement = document.getElementById("title");
-
-    let title = titleElement.innerText.trim();
-
-    if (title === "") {
-      title = null;
-    }
-
-    const ownerElement = document.getElementById("owner");
-
-    const channel = ownerElement.innerText
-      .slice(0, ownerElement.innerText.indexOf("\n"))
-      .trim();
-
+    const title = WatchList.getVideoTitle(document);
+    const channel = WatchList.getVideoChannel(document);
+    const duration = WatchList.getVideoDuration(document);
     const thumbnail = await WatchList.downloadThumbnailAsync(url);
 
     const newVideo = {
@@ -138,6 +127,7 @@ class WatchList {
       channel,
       dateAdded: Date.now(),
       thumbnail,
+      duration,
       ordinal: null,
     };
 
@@ -352,6 +342,42 @@ class WatchList {
     const base64String = await WatchList.convertBlobToBase64(blob);
 
     return base64String;
+  }
+
+  static refreshVideo(document, video) {
+    const duration = WatchList.getVideoDuration(document);
+
+    video.duration = duration;
+
+    return video;
+  }
+
+  static getVideoTitle(document) {
+    const titleElement = document.getElementById("title");
+
+    const title = titleElement.innerText.trim();
+
+    return title === "" ? null : title;
+  }
+
+  static getVideoChannel(document) {
+    const ownerElement = document.getElementById("owner");
+
+    const channel = ownerElement.innerText
+      .slice(0, ownerElement.innerText.indexOf("\n"))
+      .trim();
+
+    return channel;
+  }
+
+  static getVideoDuration(document) {
+    const durationElements = document.getElementsByClassName("ytp-time-duration");
+
+    if (durationElements?.length === 0) {
+      return null;
+    }
+
+    return durationElements[0].textContent;
   }
 
   static async exportWatchlistAsync() {

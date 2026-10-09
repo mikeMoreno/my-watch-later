@@ -274,7 +274,7 @@ class WatchLaterPopup {
 <div id="my-watchlist" style="
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width:800px;
+    width:650px;
     color: white;
     height:300px;
     overflow-y: auto;
@@ -350,6 +350,7 @@ class WatchLaterPopup {
       const title = video.title ?? "Couldn't get title";
       const url = video.url;
       const thumbnail = video.thumbnail;
+      const videoDuration = video.duration;
 
       const idPortion = Utils.getIdPortionOfVideoUrl(url);
 
@@ -373,13 +374,23 @@ class WatchLaterPopup {
         <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">
           ${imgTagHtml}
         </a>
-        <a style="color: white;font-size:15px;margin-left:10px;margin-right:10px" href="${url}">${title}</a>
-        <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
-        <button id="archive-video-${videoId}" style="margin-right:10px">Archive</button>
-        <button id="move-to-top-video-${videoId}" style="margin-right:10px">Move to Top</button>
-        <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
+        <span style="display: inline-flex; flex-direction: column; align-items: left; vertical-align: middle;">
+          <a style="color: white;font-size:15px;margin-right:10px" href="${url}">${title}</a>
+          <span style="margin-top:10px">
+            <button id="remove-video-${videoId}" style="margin-right:10px">Remove</button>
+            <button id="archive-video-${videoId}" style="margin-right:10px">Archive</button>
+            <button id="move-to-top-video-${videoId}" style="margin-right:10px">Move to Top</button>
+            <a target="_blank" rel="noopener noreferrer" href="https://img.youtube.com/vi/${idPortion}/maxresdefault.jpg">View Thumbnail</a>
+          </span>
+          <span id="video-duration-${videoId}" style="color: white;margin-top:10px"></span>
+        </span>
       </li>`,
       );
+
+      const videoDurationElement = document.getElementById(
+        `video-duration-${videoId}`,
+      );
+      videoDurationElement.innerText = videoDuration ?? "";
 
       const btnMoveVideoUp = document.getElementById(
         `move-video-up-${videoId}`,
@@ -539,12 +550,14 @@ class WatchList {
     }
 
     if (await WatchList.isVideoInWatchlistAsync(url)) {
-      const video = await WatchList.getVideoByUrl(url);
-
       const sortDirection = await Utils.getCurrentSortDirectionAsync();
 
       if (sortDirection === "Descending") {
-        await WatchList.moveVideoToTopAsync(video);
+        const video = await WatchList.getVideoByUrl(url);
+
+        const refreshedVideo = WatchList.refreshVideo(document, video);
+
+        await WatchList.moveVideoToTopAsync(refreshedVideo);
         WatchList.showWarningMessage(
           "We already had that video. Moving it to top.",
         );
@@ -557,20 +570,9 @@ class WatchList {
       return;
     }
 
-    const titleElement = document.getElementById("title");
-
-    let title = titleElement.innerText.trim();
-
-    if (title === "") {
-      title = null;
-    }
-
-    const ownerElement = document.getElementById("owner");
-
-    const channel = ownerElement.innerText
-      .slice(0, ownerElement.innerText.indexOf("\n"))
-      .trim();
-
+    const title = WatchList.getVideoTitle(document);
+    const channel = WatchList.getVideoChannel(document);
+    const duration = WatchList.getVideoDuration(document);
     const thumbnail = await WatchList.downloadThumbnailAsync(url);
 
     const newVideo = {
@@ -580,6 +582,7 @@ class WatchList {
       channel,
       dateAdded: Date.now(),
       thumbnail,
+      duration,
       ordinal: null,
     };
 
@@ -815,6 +818,43 @@ class WatchList {
     const base64String = await WatchList.convertBlobToBase64(blob);
 
     return base64String;
+  }
+
+  static refreshVideo(document, video) {
+    const duration = WatchList.getVideoDuration(document);
+
+    video.duration = duration;
+
+    return video;
+  }
+
+  static getVideoTitle(document) {
+    const titleElement = document.getElementById("title");
+
+    const title = titleElement.innerText.trim();
+
+    return title === "" ? null : title;
+  }
+
+  static getVideoChannel(document) {
+    const ownerElement = document.getElementById("owner");
+
+    const channel = ownerElement.innerText
+      .slice(0, ownerElement.innerText.indexOf("\n"))
+      .trim();
+
+    return channel;
+  }
+
+  static getVideoDuration(document) {
+    const durationElements =
+      document.getElementsByClassName("ytp-time-duration");
+
+    if (durationElements?.length === 0) {
+      return null;
+    }
+
+    return durationElements[0].textContent;
   }
 
   static async exportWatchlistAsync() {
